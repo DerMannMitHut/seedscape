@@ -1,54 +1,34 @@
-[project]
+[tool.poetry]
 name = "seedscape"
 version = "0.1.0"
 description = "A procedurally generated Hexploration RPG engine where worlds grow from seeds."
-authors = [
-  { name = "Der Mann mit Hut", email = "dermannmithut@metstuebchen.de" }
-]
+authors = ["Der Mann mit Hut <DerMannMitHut@metstuebchen.de>"]
 readme = "README.md"
-requires-python = ">=3.10"
-license = { text = "MIT" }
+license = "MIT"
 keywords = ["rpg", "hexmap", "procedural-generation", "fastapi", "ai", "seedscape"]
 
-dependencies = [
-  "fastapi>=0.115.0",
-  "uvicorn[standard]>=0.30.0",
-  "python-dotenv>=1.0.1",
+packages = [{ include = "seedscape", from = "src" }]
+
+include = [
+  { path = "frontend", format = "sdist" },
+  { path = "rules", format = "sdist" },
+  { path = "data", format = "sdist" }
 ]
 
-[project.optional-dependencies]
-dev = [
-  "pytest>=8.0.0",
-  "black>=24.0.0",
-  "ruff>=0.5.0",
-  "mypy>=1.10.0",
-]
-llm = [
-  "ollama>=0.1.9",
-  "litellm>=1.33.0",
-  "openai>=1.12.0"
-]
+[tool.poetry.dependencies]
+python = ">=3.10,<3.14"
+fastapi = ">=0.115.0"
+uvicorn = {version=">=0.30.0", extras=["standard"]}
+pydantic = ">=2.7.0"
+python-dotenv = ">=1.0.1"
 
-[project.urls]
-homepage = "https://github.com/DerMannMitHut/seedscape"
-repository = "https://github.com/DerMannMitHut/seedscape"
-documentation = "https://github.com/DerMannMitHut/seedscape/wiki"
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.0.0"
+black = ">=24.0.0"
+ruff = ">=0.5.0"
+mypy = ">=1.10.0"
+types-python-dateutil = "*"
 
-[tool.setuptools.packages.find]
-where = ["backend"]
-
-[tool.black]
-line-length = 88
-target-version = ["py310"]
-
-[tool.ruff]
-line-length = 88
-target-version = "py310"
-select = ["E", "F", "I"]
-ignore = ["E501"]
-
-[tool.mypy]
-python_version = "3.10"
-ignore_missing_imports = true
-strict_optional = true
-check_untyped_defs = true
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"
