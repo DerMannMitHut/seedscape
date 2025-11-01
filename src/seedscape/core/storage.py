@@ -1,23 +1,17 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 from typing import List, Optional
 
+from seedscape.core.envconfig import SEEDSCAPE_DATA_DIR
 from seedscape.core.models import CampaignMeta, Hex
 
 
 def _detect_data_dir() -> Path:
-    env = os.getenv("SEEDSCAPE_DATA_DIR")
-    if env:
-        p = Path(env).expanduser().resolve()
-        p.mkdir(parents=True, exist_ok=True)
-        return p
-    repo_root = Path(__file__).resolve().parents[3]
-    data = repo_root / "data"
-    data.mkdir(parents=True, exist_ok=True)
-    return data
+    p = SEEDSCAPE_DATA_DIR
+    p.mkdir(parents=True, exist_ok=True)
+    return p
 
 DATA_DIR = _detect_data_dir()
 CAMPAIGNS_DIR = DATA_DIR / "campaigns"

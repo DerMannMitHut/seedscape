@@ -1,6 +1,7 @@
-# backend/core/generator.py
 import random
-from seedscape.core.models import Hex, Biome, Feature, Encounter
+
+from seedscape.core.models import Biome, Encounter, Feature, Hex
+
 
 def generate_hex(seed: str, hex_id: str) -> Hex:
     rnd = random.Random(hash(seed + hex_id))

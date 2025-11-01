@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from seedscape.core import generator
-from seedscape.core import storage
+from seedscape.core import generator, storage
 from seedscape.core.models import Hex
 
 router = APIRouter()
