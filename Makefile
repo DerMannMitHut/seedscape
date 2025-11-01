@@ -1,123 +1,127 @@
-# ==============================
-# Seedscape Makefile
-# ==============================
+# -------- SeedScape Makefile --------
+SHELL := /bin/bash
 
-# Config
-PYTHON := python3
-POETRY := poetry
-APP := seedscape.main:app
-PORT := 8000
-
-# Dirs
-SRC_DIR := src
-FRONTEND_DIR := frontend
-VENV := .venv
-DIST := dist
-
-# ========= Helpers =========
-# .env automatisch einlesen (exportiert nur KEY=VALUE Zeilen)
+# Load env from .env files (if present)
+# This includes only lines with KEY=VALUE (ignores comments/empty/export).
 ifneq (,$(wildcard .env))
-ENV_EXPORT := set -a; . ./.env; set +a;
+include .env
+export $(shell sed -n 's/^\s*\([^#][^=[:space:]]*\)\s*=.*/\1/p' .env)
+endif
+ifneq (,$(wildcard .env.local))
+include .env.local
+export $(shell sed -n 's/^\s*\([^#][^=[:space:]]*\)\s*=.*/\1/p' .env.local)
 endif
 
-# ========= Targets =========
-.PHONY: help run dev install clean test build setup install-poetry
+# ---------------- Defaults (override in .env/.env.local) ----------------
+# Server
+HOST ?= 127.0.0.1
+PORT ?= 8000
+# Module path: keep generic; allow override via .env as APP_MODULE="seedscape.main:app"
+APP_MODULE ?= seedscape.main:app
+# Reload dirs to watch during dev; keep narrow to avoid .venv thrash
+RELOAD_DIRS ?= src rules
+# Reload excludes to prevent infinite loops
+RELOAD_EXCLUDES ?= .venv .git node_modules dist build __pycache__ *.pyc
+# Python version for venv (optional)
+PY ?= python3
 
-help:
-	@echo "Seedscape – Makefile Befehle:"
-	@echo "  make run            Startet Uvicorn mit Reload (src + frontend)"
-	@echo "  make dev            Wie run, lädt zusätzlich .env und setzt Debug-Logs"
-	@echo "  make install        Poetry-Install der Abhängigkeiten (--sync)"
-	@echo "  make clean          Entfernt .venv, dist, Caches"
-	@echo "  make test           Führt pytest aus"
-	@echo "  make build          Erstellt sdist + wheel (poetry build)"
-	@echo "  make install-poetry Installiert Poetry, falls nicht vorhanden"
-	@echo "  make setup          install-poetry + install"
+# Tools (can be swapped without changing README)
+POETRY ?= poetry
+UVICORN ?= uvicorn
+PYTEST ?= pytest
+MYPY ?= mypy
+RUFF ?= ruff
 
-# ---------------------------------------
-# Server normal (Hot Reload, saubere Excludes)
-# ---------------------------------------
-run:
-	@echo "🚀 Starte Seedscape auf http://127.0.0.1:$(PORT)"
-	@$(POETRY) run uvicorn $(APP) \
-		--host 127.0.0.1 --port $(PORT) \
-		--reload \
-		--reload-dir $(SRC_DIR) \
-		--reload-dir $(FRONTEND_DIR) \
-		--reload-exclude ".venv/*" \
-		--reload-exclude "**/site-packages/**" \
-		--reload-exclude "**/__pycache__/**" \
-		--reload-exclude ".mypy_cache/*" \
-		--reload-exclude ".ruff_cache/*"
+# --------------- Helpers ---------------
+define check_or_install_poetry
+@if ! command -v $(POETRY) >/dev/null 2>&1; then \
+  echo "Poetry not found. Installing..."; \
+  curl -sSL https://install.python-poetry.org | $(PY) -; \
+  echo "Please ensure Poetry is on your PATH (restart shell if needed)."; \
+fi
+endef
 
-# ---------------------------------------
-# Dev-Server (lädt .env, Debug-Logs)
-# ---------------------------------------
-dev:
-	@echo "🔧 Dev-Modus (lädt .env, Debug-Logs) auf http://127.0.0.1:$(PORT)"
-	@$(ENV_EXPORT) \
-	$(POETRY) run uvicorn $(APP) \
-		--host 127.0.0.1 --port $(PORT) \
-		--reload --log-level debug \
-		--reload-dir $(SRC_DIR) \
-		--reload-dir $(FRONTEND_DIR) \
-		--reload-exclude ".venv/*" \
-		--reload-exclude "**/site-packages/**" \
-		--reload-exclude "**/__pycache__/**" \
-		--reload-exclude ".mypy_cache/*" \
-		--reload-exclude ".ruff_cache/*"
+define run_if_exists
+@if command -v $(1) >/dev/null 2>&1; then \
+  echo "→ $(1)"; \
+  $(POETRY) run $(1) $(2); \
+else \
+  echo "(!) Skipping: '$(1)' not installed."; \
+fi
+endef
 
-# ---------------------------------------
-# Installation
-# ---------------------------------------
-install:
-	@echo "📦 Poetry install (sync)..."
-	@$(POETRY) install --sync
+# --------------- Targets ---------------
+.PHONY: install install-poetry dev run test lint typecheck format clean export-req help
 
-# Einmaliges Setup: Poetry (falls nötig) + install
-setup: install-poetry install
+## Install dependencies (creates .venv) — stable entrypoint
+install: install-poetry
+	@echo "==> Installing dependencies"
+	@$(POETRY) install
 
-# ---------------------------------------
-# Poetry Autodetect + Installation
-# ---------------------------------------
+## Install Poetry if missing (auto-detect)
 install-poetry:
-	@echo "🔎 Prüfe Poetry..."
-	@if command -v poetry >/dev/null 2>&1; then \
-		echo "✅ Poetry vorhanden: $$(poetry --version)"; \
-	else \
-		echo "📥 Installiere Poetry..."; \
-		$(PYTHON) - <<'PY' || true ;\
-import os, sys, subprocess, shutil; \
-url="https://install.python-poetry.org"; \
-print("→ Lade Installer:", url); \
-subprocess.check_call([sys.executable, "-c", "__import__('urllib.request').urlretrieve('%s','poetry_install.py')" % url]); \
-subprocess.check_call([sys.executable, "poetry_install.py"]); \
-home = os.path.expanduser("~"); \
-local_bin = os.path.join(home, ".local", "bin"); \
-print("\nℹ️  Bitte stelle sicher, dass", local_bin, "im PATH ist."); \
-print("   z.B.: export PATH=\"$$PATH:%s\"" % local_bin) \
-PY \
-	; fi
+	$(call check_or_install_poetry)
 
-# ---------------------------------------
-# Clean / Reset
-# ---------------------------------------
-clean:
-	@echo "🧹 Entferne .venv, dist und Cache-Verzeichnisse ..."
-	@rm -rf $(VENV) $(DIST) .mypy_cache .ruff_cache .pytest_cache
-	@find . -type d -name "__pycache__" -prune -exec rm -rf {} +
-	@echo "✅ Clean abgeschlossen."
+## Development server with autoreload and safe watch settings
+dev:
+	@echo "==> Starting development server (autoreload)"
+	@set -e; \
+	RELOAD_DIR_FLAGS=""; \
+	for d in $(RELOAD_DIRS); do RELOAD_DIR_FLAGS="$$RELOAD_DIR_FLAGS --reload-dir $$d"; done; \
+	EXCLUDE_FLAGS=""; \
+	for x in $(RELOAD_EXCLUDES); do EXCLUDE_FLAGS="$$EXCLUDE_FLAGS --reload-exclude $$x"; done; \
+	$(POETRY) run $(UVICORN) $(APP_MODULE) --host $(HOST) --port $(PORT) --reload $$RELOAD_DIR_FLAGS $$EXCLUDE_FLAGS
 
-# ---------------------------------------
-# Tests (optional)
-# ---------------------------------------
+## Run server normally (no autoreload)
+run:
+	@echo "==> Starting server"
+	@$(POETRY) run $(UVICORN) $(APP_MODULE) --host $(HOST) --port $(PORT)
+
+## Run tests, lints, and type checks (skips tools that aren't installed)
 test:
-	@echo "🧪 Tests laufen ..."
-	@$(POETRY) run pytest -q
+	@echo "==> Running tests & code checks"
+	$(call run_if_exists,$(RUFF),check .)
+	$(call run_if_exists,$(MYPY),src)
+	$(call run_if_exists,$(PYTEST),-q)
 
-# ---------------------------------------
-# Build (sdist + wheel)
-# ---------------------------------------
-build:
-	@echo "📦 Baue Distribution ..."
-	@$(POETRY) build
+## Code style (if configured)
+lint:
+	$(call run_if_exists,$(RUFF),check .)
+
+## Type checks (if configured)
+typecheck:
+	$(call run_if_exists,$(MYPY),src)
+
+## Auto-format (if configured to use ruff/black)
+format:
+	$(call run_if_exists,$(RUFF),format .)
+	@# If you prefer black, uncomment the next line and add black to dev deps
+	@# $(POETRY) run black .
+
+## Export requirements.txt for non-Poetry environments
+export-req:
+	@echo "==> Exporting requirements.txt"
+	@$(POETRY) export -f requirements.txt --without-hashes -o requirements.txt
+
+## Clean local artifacts for a fresh setup
+clean:
+	@echo "==> Cleaning local artifacts"
+	@rm -rf .venv dist build .pytest_cache .mypy_cache .ruff_cache __pycache__ **/__pycache__ *.pyc *.pyo *.log
+	@find . -name '*.pyc' -delete -o -name '*.pyo' -delete
+
+## Help: list targets
+help:
+	@echo ""
+	@echo "SeedScape Make targets:"
+	@echo "  make install        - Install dependencies (Poetry)"
+	@echo "  make install-poetry - Autodetect/Install Poetry"
+	@echo "  make dev            - Start dev server with autoreload"
+	@echo "  make run            - Start server without autoreload"
+	@echo "  make test           - Run tests, lints, type checks"
+	@echo "  make lint           - Run linters only"
+	@echo "  make typecheck      - Run type checks only"
+	@echo "  make format         - Auto-format code (if configured)"
+	@echo "  make export-req     - Export requirements.txt"
+	@echo "  make clean          - Remove local build/test caches & venv"
+	@echo ""
+	@echo "Config via .env/.env.local: HOST, PORT, APP_MODULE, RELOAD_DIRS, RELOAD_EXCLUDES"
