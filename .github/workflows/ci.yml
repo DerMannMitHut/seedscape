@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.13']
 
     steps:
       - name: Checkout
@@ -27,23 +27,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Cache Poetry installation
-        id: cache-poetry
-        uses: actions/cache@v4
-        with:
-          path: ~/.local/share/pypoetry
-          key: poetry-${{ runner.os }}-${{ matrix.python-version }}
-
       - name: Install Poetry
-        if: steps.cache-poetry.outputs.cache-hit != 'true'
-        run: |
-          curl -sSL https://install.python-poetry.org | python -
-        shell: bash
+        run: make install-poetry
 
       - name: Add Poetry to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Configure Poetry (no virtualenvs in project by default)
+      - name: Configure Poetry
         run: |
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
@@ -63,13 +53,13 @@ jobs:
           path: ~/.cache/pip
           key: pip-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Install dependencies
+      - name: Install dependencies (Makefile handles Poetry)
         run: make install
 
       - name: Run tests, linters, and type checks
         run: make test
 
-      # Optional: upload coverage if available
+      # Optional coverage artifact
       - name: Upload coverage (if file exists)
         if: hashFiles('coverage.xml') != ''
         uses: actions/upload-artifact@v4
