@@ -1,0 +1,73 @@
+# ============================================
+# Seedscape .gitignore
+# ============================================
+
+# --- Python / Poetry ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.build/
+dist/
+pip-wheel-metadata/
+.tox/
+.coverage
+.coverage.*
+.cache/
+pytest_cache/
+mypy_cache/
+ruff_cache/
+.dmypy.json
+.pytest_cache/
+*.log
+*.tmp
+
+# --- Virtual Environment ---
+.venv/
+venv/
+env/
+ENV/
+.poetry/
+.poetry-cache/
+.poetry-build/
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*.orig
+.DS_Store
+Thumbs.db
+
+# --- Node / Frontend ---
+frontend/node_modules/
+frontend/dist/
+frontend/.parcel-cache/
+frontend/.vite/
+frontend/.next/
+frontend/build/
+
+# --- Local configuration ---
+.env
+.env.*
+!.env.example
+
+# --- Data / Campaigns (runtime-generated) ---
+data/campaigns/*
+data/users/*
+!data/.gitkeep
+!data/campaigns/.gitkeep
+!data/users/.gitkeep
+
+# Falls du ein paar Beispielkampagnen versionieren willst,
+# füge sie hier explizit hinzu, z.B.:
+# !data/campaigns/example_campaign/meta.json
+
+# --- Rules / Assets ---
+# (optional, falls du z. B. ge
