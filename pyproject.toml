@@ -36,7 +36,7 @@ build-backend = "poetry.core.masonry.api"
 # Ruff configuration: linting and formatting
 [tool.ruff]
 target-version = "py310"
-line-length = 100
+line-length = 120
 exclude = [
   ".git",
   ".venv",
@@ -59,8 +59,7 @@ select = [
   "PIE", # flake8-pie
   "RUF", # Ruff-specific rules
 ]
-# Line-length is enforced by the formatter; avoid duplicate lint noise
-ignore = ["E501"]
+
 
 [tool.ruff.lint.isort]
 known-first-party = ["seedscape"]
@@ -71,4 +70,4 @@ quote-style = "double"
 indent-style = "space"
 line-ending = "auto"
 docstring-code-format = true
-docstring-code-line-length = 100
+docstring-code-line-length = 120
