@@ -33,6 +33,8 @@ make run
 
 Starts the server without debug or hot-reload features (e.g., for tests or container builds).
 
+Before interacting in the UI, enter a campaign name in the input field (e.g., `example`). The app fails fast when no campaign is selected.
+
 ### 4. Tests & Code Checks
 
 ```bash
