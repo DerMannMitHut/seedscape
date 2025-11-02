@@ -1,14 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Seedscape</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h1>Seedscape 🌱</h1>
-  <div id="map"></div>
-  <div id="info"></div>
-  <script src="main.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SeedScape — Hex Map</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>SeedScape — Hex Map</h1>
+      <div class="hint">Click a hex to load details from <code>/api/&lt;campaign&gt;/hex/&lt;id&gt;</code>. Drag to pan, wheel to zoom.</div>
+      <div class="toolbar">
+        <label>Campaign:
+          <input id="campaign" type="text" value="default" />
+        </label>
+        <button id="resetView">Reset view</button>
+        <label class="checkbox">
+          <input id="labelCoords" type="checkbox" /> Coords labels
+        </label>
+      </div>
+    </header>
+
+    <main>
+      <section class="map-wrap">
+        <!-- SVG rendered by main.js -->
+        <svg id="hexmap" width="960" height="640" role="img" aria-label="Hex map"></svg>
+        <div id="tooltip" class="tooltip" hidden></div>
+      </section>
+
+      <aside class="sidebar" id="sidebar">
+        <h2>Hex Info</h2>
+        <div id="hexInfo" class="hex-info">
+          <div class="empty">Click a hex to load data…</div>
+        </div>
+        <details class="cache">
+          <summary>Cached hexes</summary>
+          <ul id="cacheList"></ul>
+        </details>
+      </aside>
+    </main>
+
+    <footer>
+      <small>Phase 2 prototype — static frontend. Data is fetched from the backend. Optional in-browser cache via <code>localStorage</code>.</small>
+    </footer>
+
+    <script src="./main.js" type="module"></script>
+  </body>
 </html>

@@ -1,0 +1,50 @@
+<style>
+:root {
+  --bg: #0b0b0b;
+  --panel: #151515;
+  --text: #e9e9e9;
+  --muted: #9aa0a6;
+  --accent: #7ab6e8;
+  --border: #242424;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  background: var(--bg); color: var(--text);
+}
+header, footer {
+  padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--panel);
+}
+footer { border-top: 1px solid var(--border); border-bottom: none; }
+.hint { color: var(--muted); }
+.toolbar { margin-top: 6px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.checkbox { display: inline-flex; gap: 6px; align-items: center; }
+main { display: grid; grid-template-columns: 1fr 320px; gap: 12px; padding: 12px; }
+.map-wrap { position: relative; background: #0f0f10; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.sidebar { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px; min-height: 200px; }
+.sidebar h2 { margin-top: 0; }
+.hex-info .empty { color: var(--muted); font-style: italic; }
+.tooltip { position: absolute; pointer-events: none; background: #777; border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; font-size: 12px; color: var(--text); box-shadow: 0 4px 24px rgba(0,0,0,0.5); }
+button { background: #1c1c1c; color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+button:hover { background: #222; }
+code { background: #777; padding: 1px 4px; border-radius: 6px; border: 1px solid var(--border); }
+legend { font-weight: 600; }
+
+/* Hex colors (biomes) */
+.hex.plains { fill: #A3D977; }
+.hex.forest { fill: #4FA36D; }
+.hex.hills { fill: #C4A46A; }
+.hex.mountains { fill: #9A9AA1; }
+.hex.swamp { fill: #6B8A76; }
+.hex.desert { fill: #E7C66B; }
+.hex.water { fill: #7AB6E8; }
+.hex.tundra { fill: #DCE7F1; }
+.hex-border { stroke: #232323; stroke-width: 1; }
+.hex.selected { stroke: #ffffff; stroke-width: 2; }
+
+/* Responsive */
+@media (max-width: 1000px) {
+  main { grid-template-columns: 1fr; }
+}
+</style>
