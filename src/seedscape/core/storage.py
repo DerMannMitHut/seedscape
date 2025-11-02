@@ -31,18 +31,11 @@ def campaign_exists(name: str) -> bool:
     return _campaign_path(name).exists()
 
 
-def create_campaign(name: str, seed: str) -> CampaignMeta:
+def create_campaign(name: str, seed: str, biomes: list[str], biomes_css: str) -> CampaignMeta:
     path = _campaign_path(name)
     (path / "hexes").mkdir(parents=True, exist_ok=True)
-    meta = CampaignMeta(name=name, seed=seed)
+    meta = CampaignMeta(name=name, seed=seed, biomes=biomes, biomes_css=biomes_css)
     save_campaign_meta(meta)
-    # Create default biomes.css if missing
-    css_path = path / meta.biomes_css
-    if not css_path.exists():
-        css_path.write_text(
-            _default_biomes_css(meta.biomes),
-            encoding="utf-8",
-        )
     return meta
 
 
@@ -68,25 +61,7 @@ def campaign_biomes_css_path(campaign: str) -> Path | None:
     return css_path if css_path.exists() else None
 
 
-def _default_biomes_css(biomes: list[str]) -> str:
-    # Provide a simple palette; unknown biomes fall back to .hex.unloaded
-    palette = {
-        "plains": "#a3d977",
-        "forest": "#4fa36d",
-        "hills": "#c4a46a",
-        "mountain": "#9a9aa1",
-        "swamp": "#6b8a76",
-        "desert": "#e7c66b",
-        "water": "#7ab6e8",
-        "tundra": "#dce7f1",
-    }
-    lines = [
-        "/* Campaign biomes */",
-    ]
-    for b in biomes:
-        color = palette.get(b, "#888888")
-        lines.append(f".hex.{b} {{\n    fill: {color};\n}}")
-    return "\n\n".join(lines) + "\n"
+# Note: default biomes CSS generation was intentionally removed to avoid hidden defaults.
 
 
 def _hex_path(campaign: str, hex_id: str) -> Path:

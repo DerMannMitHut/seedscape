@@ -36,11 +36,10 @@ class CampaignMeta(BaseModel):
     description: str = ""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     version: str = "0.1"
-    # Data-driven biomes per campaign
-    biomes: list[str] = Field(
-        default_factory=lambda: ["plains", "forest", "hills", "mountain", "swamp", "desert", "water", "tundra"]
-    )
-    biomes_css: str = "biomes.css"
+    # Data-driven biomes per campaign (required; no defaults)
+    biomes: list[str]
+    # Relative CSS filename within the campaign directory (required; no defaults)
+    biomes_css: str
 
 
 class UserAccount(BaseModel):
