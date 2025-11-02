@@ -35,6 +35,7 @@
 ## Commit & Pull Request Guidelines
 - Commits: short imperative subject. Prefer Conventional Commit prefixes when sensible (e.g., `feat:`, `fix:`, `refactor:`). Group related changes.
 - PRs: include a clear description, linked issues, and steps to verify (commands, screenshots for frontend changes). Keep diffs focused; update docs when behavior changes.
+- Pre-commit: ensure local checks pass — run `make format`, `make lint`, and `make test` before committing. CI enforces the same style, lint, and tests.
 
 ## Security & Configuration Tips
 - Never commit secrets. Copy `.env.example` to `.env` and customize locally.
