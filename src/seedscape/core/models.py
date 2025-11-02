@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, field_validator
 
 HexId = str
 
-Biome = Literal["forest", "desert", "mountain", "plains", "swamp"]
+Biome = str  # now campaign-defined via meta.json
 Feature = Literal["ruins", "village", "tower", "river crossing", "none"]
 Encounter = Literal["none", "bandits", "wolves", "travelers"]
 
@@ -36,6 +36,10 @@ class CampaignMeta(BaseModel):
     description: str = ""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     version: str = "0.1"
+    # Data-driven biomes per campaign (required; no defaults)
+    biomes: list[str]
+    # Relative CSS filename within the campaign directory (required; no defaults)
+    biomes_css: str
 
 
 class UserAccount(BaseModel):

@@ -203,8 +203,14 @@ async function onHexClick({ id }) {
     await selectHex(id);
 }
 
+function currentCampaignOrFail() {
+    const v = campaignInput.value.trim();
+    if (!v) throw new Error("No campaign selected");
+    return v;
+}
+
 async function getData(id) {
-    const campaign = campaignInput.value.trim() || "default";
+    const campaign = currentCampaignOrFail();
     const cacheKey = `hex:${campaign}:${id}`;
     const cached = localStorage.getItem(cacheKey);
 
@@ -335,6 +341,11 @@ function escapeHtml(s) {
 
 // ---- Init ----
 labelCoordsEl.checked = state.labelCoords;
+try {
+    ensureCampaignStyles(currentCampaignOrFail());
+} catch (e) {
+    console.error("Campaign styles not loaded:", e);
+}
 drawGrid();
 refreshCacheList();
 
@@ -367,3 +378,29 @@ applyTheme();
 
 // -------------------------------------------------------------------------------- preselect hex
 selectHex(axialToId(0, 0));
+
+// -------------------------------------------------------------------------------- campaign assets (biomes.css)
+function ensureCampaignStyles(campaign) {
+    const id = "campaign-biomes-css";
+    const href = `/api/campaigns/${encodeURIComponent(campaign)}/assets/biomes.css`;
+    let link = document.getElementById(id);
+    if (!link) {
+        link = document.createElement("link");
+        link.id = id;
+        link.rel = "stylesheet";
+        document.head.appendChild(link);
+    }
+    // Add a cache-busting param when campaign changes
+    const url = new URL(href, location.origin);
+    url.searchParams.set("_", String(Date.now()));
+    link.href = url.pathname + url.search;
+}
+
+campaignInput.addEventListener("change", () => {
+    const v = campaignInput.value.trim();
+    if (!v) {
+        console.error("No campaign selected; not loading styles");
+        return;
+    }
+    ensureCampaignStyles(v);
+});

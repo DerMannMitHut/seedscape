@@ -31,10 +31,10 @@ def campaign_exists(name: str) -> bool:
     return _campaign_path(name).exists()
 
 
-def create_campaign(name: str, seed: str) -> CampaignMeta:
+def create_campaign(name: str, seed: str, biomes: list[str], biomes_css: str) -> CampaignMeta:
     path = _campaign_path(name)
     (path / "hexes").mkdir(parents=True, exist_ok=True)
-    meta = CampaignMeta(name=name, seed=seed)
+    meta = CampaignMeta(name=name, seed=seed, biomes=biomes, biomes_css=biomes_css)
     save_campaign_meta(meta)
     return meta
 
@@ -51,6 +51,17 @@ def save_campaign_meta(meta: CampaignMeta) -> None:
     path = _campaign_path(meta.name)
     path.mkdir(parents=True, exist_ok=True)
     (path / "meta.json").write_text(meta.model_dump_json(indent=2), encoding="utf-8")
+
+
+def campaign_biomes_css_path(campaign: str) -> Path | None:
+    meta = load_campaign_meta(campaign)
+    if not meta:
+        return None
+    css_path = _campaign_path(campaign) / meta.biomes_css
+    return css_path if css_path.exists() else None
+
+
+# Note: default biomes CSS generation was intentionally removed to avoid hidden defaults.
 
 
 def _hex_path(campaign: str, hex_id: str) -> Path:

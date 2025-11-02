@@ -1,0 +1,16 @@
+{
+  "name": "example",
+  "seed": "demo-seed-001",
+  "description": "Demo campaign with data-driven biomes",
+  "biomes": [
+    "plains",
+    "forest",
+    "hills",
+    "mountain",
+    "swamp",
+    "desert",
+    "water",
+    "tundra"
+  ],
+  "biomes_css": "biomes.css"
+}
