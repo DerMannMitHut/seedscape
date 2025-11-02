@@ -1,47 +1,48 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SeedScape — Hex Map</title>
-    <link rel="stylesheet" href="./style.css" />
-  </head>
-  <body class="theme-dark">
-    <header>
-      <h1>SeedScape — Hex Map</h1>
-      <div class="hint">
-        Click a hex to load details from <code>/api/&lt;campaign&gt;/hex/&lt;id&gt;</code>. Drag to pan, wheel to zoom.
-      </div>
-      <div class="toolbar">
-        <label
-          >Campaign:
-          <input id="campaign" type="text" value="default" />
-        </label>
-        <button id="resetView">Reset view</button>
-        <button id="toggleTheme" title="Toggle light/dark">Light mode</button>
-        <button id="clearCache">Clear cache</button>
-        <label class="checkbox"> <input id="labelCoords" type="checkbox" /> Coords labels </label>
-      </div>
-    </header>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>SeedScape — Hex Map</title>
+        <link rel="stylesheet" href="./style.css" />
+    </head>
+    <body class="theme-dark">
+        <header>
+            <h1>SeedScape — Hex Map</h1>
+            <div class="hint">
+                Click a hex to load details from <code>/api/&lt;campaign&gt;/hex/&lt;id&gt;</code>. Drag to pan, wheel
+                to zoom.
+            </div>
+            <div class="toolbar">
+                <label
+                    >Campaign:
+                    <input id="campaign" type="text" value="default" />
+                </label>
+                <button id="resetView">Reset view</button>
+                <button id="toggleTheme" title="Toggle light/dark">Light mode</button>
+                <button id="clearCache">Clear cache</button>
+                <label class="checkbox"> <input id="labelCoords" type="checkbox" /> Coords labels </label>
+            </div>
+        </header>
 
-    <main>
-      <section class="map-wrap">
-        <svg id="hexmap" width="960" height="640" role="img" aria-label="Hex map"></svg>
-        <div id="tooltip" class="tooltip" hidden></div>
-      </section>
+        <main>
+            <section class="map-wrap">
+                <svg id="hexmap" width="960" height="640" role="img" aria-label="Hex map"></svg>
+                <div id="tooltip" class="tooltip" hidden></div>
+            </section>
 
-      <aside class="sidebar" id="sidebar">
-        <h2>Hex Info</h2>
-        <div id="hexInfo" class="hex-info">
-          <div class="empty">Click a hex to load data…</div>
-        </div>
-        <details class="cache">
-          <summary>Cached hexes</summary>
-          <ul id="cacheList"></ul>
-        </details>
-      </aside>
-    </main>
+            <aside class="sidebar" id="sidebar">
+                <h2>Hex Info</h2>
+                <div id="hexInfo" class="hex-info">
+                    <div class="empty">Click a hex to load data…</div>
+                </div>
+                <details class="cache">
+                    <summary>Cached hexes</summary>
+                    <ul id="cacheList"></ul>
+                </details>
+            </aside>
+        </main>
 
-    <script src="./main.js" type="module"></script>
-  </body>
+        <script src="./main.js" type="module"></script>
+    </body>
 </html>
