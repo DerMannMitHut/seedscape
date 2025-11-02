@@ -64,6 +64,9 @@ data/users/*
 !data/.gitkeep
 !data/campaigns/.gitkeep
 !data/users/.gitkeep
+# Versionierte Beispielkampagne (Demo):
+!data/campaigns/default/meta.json
+!data/campaigns/default/biomes.css
 
 # Falls du ein paar Beispielkampagnen versionieren willst,
 # füge sie hier explizit hinzu, z.B.:

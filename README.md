@@ -105,6 +105,16 @@ Please follow the existing code style (validated through `make test`).
 
 ---
 
+## 🌾 Campaign Biomes (data-driven)
+
+- Each campaign defines its own biomes and styles in `data/campaigns/<name>/`.
+- Required in `meta.json`:
+  - `biomes`: list of biome keys (strings)
+  - `biomes_css`: relative CSS file (e.g., `biomes.css`)
+- CSS is served at `/api/campaigns/<name>/assets/biomes.css` and loaded by the frontend.
+- Example: see `data/campaigns/default/meta.json` and `data/campaigns/default/biomes.css`.
+
+
 ## 📜 License
 
 This project is licensed under the **MIT License**.  
