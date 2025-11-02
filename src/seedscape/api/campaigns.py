@@ -2,6 +2,7 @@ import random
 import string
 
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import PlainTextResponse
 
 from seedscape.core import storage
 from seedscape.core.models import CampaignMeta
@@ -28,3 +29,19 @@ def create_campaign(name: str = Query(..., min_length=1)):
         raise HTTPException(status_code=400, detail="Campaign already exists")
     seed = "".join(random.choices(string.ascii_letters + string.digits, k=16))
     return storage.create_campaign(name, seed)
+
+
+@router.get("/campaigns/{campaign}/biomes", response_model=list[str])
+def get_campaign_biomes(campaign: str):
+    meta = storage.load_campaign_meta(campaign)
+    if not meta:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    return meta.biomes
+
+
+@router.get("/campaigns/{campaign}/assets/biomes.css", response_class=PlainTextResponse)
+def get_campaign_biomes_css(campaign: str):
+    css_path = storage.campaign_biomes_css_path(campaign)
+    if not css_path:
+        raise HTTPException(status_code=404, detail="CSS not found for campaign")
+    return PlainTextResponse(css_path.read_text(encoding="utf-8"), media_type="text/css")

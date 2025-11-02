@@ -16,6 +16,6 @@ def get_hex(campaign: str, hex_id: str) -> Hex:
     if data:
         return data
 
-    hex_model = generator.generate_hex(meta.seed, hex_id)
+    hex_model = generator.generate_hex(meta.seed, hex_id, biomes=meta.biomes)
     storage.save_hex(campaign, hex_id, hex_model)
     return hex_model

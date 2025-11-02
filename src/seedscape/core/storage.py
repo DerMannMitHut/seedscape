@@ -36,6 +36,13 @@ def create_campaign(name: str, seed: str) -> CampaignMeta:
     (path / "hexes").mkdir(parents=True, exist_ok=True)
     meta = CampaignMeta(name=name, seed=seed)
     save_campaign_meta(meta)
+    # Create default biomes.css if missing
+    css_path = path / meta.biomes_css
+    if not css_path.exists():
+        css_path.write_text(
+            _default_biomes_css(meta.biomes),
+            encoding="utf-8",
+        )
     return meta
 
 
@@ -51,6 +58,35 @@ def save_campaign_meta(meta: CampaignMeta) -> None:
     path = _campaign_path(meta.name)
     path.mkdir(parents=True, exist_ok=True)
     (path / "meta.json").write_text(meta.model_dump_json(indent=2), encoding="utf-8")
+
+
+def campaign_biomes_css_path(campaign: str) -> Path | None:
+    meta = load_campaign_meta(campaign)
+    if not meta:
+        return None
+    css_path = _campaign_path(campaign) / meta.biomes_css
+    return css_path if css_path.exists() else None
+
+
+def _default_biomes_css(biomes: list[str]) -> str:
+    # Provide a simple palette; unknown biomes fall back to .hex.unloaded
+    palette = {
+        "plains": "#a3d977",
+        "forest": "#4fa36d",
+        "hills": "#c4a46a",
+        "mountain": "#9a9aa1",
+        "swamp": "#6b8a76",
+        "desert": "#e7c66b",
+        "water": "#7ab6e8",
+        "tundra": "#dce7f1",
+    }
+    lines = [
+        "/* Campaign biomes */",
+    ]
+    for b in biomes:
+        color = palette.get(b, "#888888")
+        lines.append(f".hex.{b} {{\n    fill: {color};\n}}")
+    return "\n\n".join(lines) + "\n"
 
 
 def _hex_path(campaign: str, hex_id: str) -> Path:

@@ -335,6 +335,7 @@ function escapeHtml(s) {
 
 // ---- Init ----
 labelCoordsEl.checked = state.labelCoords;
+ensureCampaignStyles(campaignInput.value.trim() || "default");
 drawGrid();
 refreshCacheList();
 
@@ -367,3 +368,25 @@ applyTheme();
 
 // -------------------------------------------------------------------------------- preselect hex
 selectHex(axialToId(0, 0));
+
+// -------------------------------------------------------------------------------- campaign assets (biomes.css)
+function ensureCampaignStyles(campaign) {
+    const id = "campaign-biomes-css";
+    const href = `/api/campaigns/${encodeURIComponent(campaign)}/assets/biomes.css`;
+    let link = document.getElementById(id);
+    if (!link) {
+        link = document.createElement("link");
+        link.id = id;
+        link.rel = "stylesheet";
+        document.head.appendChild(link);
+    }
+    // Add a cache-busting param when campaign changes
+    const url = new URL(href, location.origin);
+    url.searchParams.set("_", String(Date.now()));
+    link.href = url.pathname + url.search;
+}
+
+campaignInput.addEventListener("change", () => {
+    const campaign = campaignInput.value.trim() || "default";
+    ensureCampaignStyles(campaign);
+});
