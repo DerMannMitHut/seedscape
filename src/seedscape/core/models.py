@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -18,7 +18,7 @@ class Hex(BaseModel):
     feature: Feature = "none"
     encounter: Encounter = "none"
     discovered: bool = False
-    notes: Optional[str] = None
+    notes: str | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     version: str = "0.1"
 

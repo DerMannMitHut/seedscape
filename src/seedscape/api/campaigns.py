@@ -8,9 +8,11 @@ from seedscape.core.models import CampaignMeta
 
 router = APIRouter()
 
+
 @router.get("/campaigns", response_model=list[str])
 def list_campaigns():
     return storage.list_campaigns()
+
 
 @router.get("/campaigns/{campaign}", response_model=CampaignMeta)
 def get_campaign(campaign: str):
@@ -18,6 +20,7 @@ def get_campaign(campaign: str):
     if not meta:
         raise HTTPException(status_code=404, detail="Campaign not found")
     return meta
+
 
 @router.post("/campaigns", response_model=CampaignMeta)
 def create_campaign(name: str = Query(..., min_length=1)):

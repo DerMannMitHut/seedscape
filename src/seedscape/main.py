@@ -13,4 +13,3 @@ app.include_router(campaigns.router, prefix="/api")
 
 frontend_dir = SEEDSCAPE_FRONTEND_DIR
 app.mount("/", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
-
