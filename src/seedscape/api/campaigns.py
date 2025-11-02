@@ -1,7 +1,6 @@
 import logging
 import random
 import string
-
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query

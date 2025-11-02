@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Pre-commit hook that delegates to Make targets for consistency.
+# Runs project-wide format, then re-stages, then lint; optionally tests.
+
+set -euo pipefail
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+# Nothing staged? quit early
+if [[ -z $(git diff --cached --name-only --diff-filter=ACMR) ]]; then
+  exit 0
+fi
+
+echo "[pre-commit] make format"
+make format
+
+# Re-stage any files changed by formatters
+git add -A
+
+echo "[pre-commit] make lint"
+make lint
+
+if [[ "${HOOK_RUN_TESTS:-0}" == "1" ]]; then
+  echo "[pre-commit] make test"
+  make test
+fi
+
+exit 0
