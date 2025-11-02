@@ -5,6 +5,7 @@ from seedscape.core.models import Hex
 
 router = APIRouter()
 
+
 @router.get("/{campaign}/hex/{hex_id}", response_model=Hex)
 def get_hex(campaign: str, hex_id: str) -> Hex:
     meta = storage.load_campaign_meta(campaign)

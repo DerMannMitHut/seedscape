@@ -31,6 +31,8 @@ UVICORN ?= uvicorn
 PYTEST ?= pytest
 MYPY ?= mypy
 RUFF ?= ruff
+# JavaScript tooling (frontend)
+NPM ?= npm
 
 # --------------- Helpers ---------------
 define check_or_install_poetry
@@ -55,8 +57,14 @@ endef
 
 ## Install dependencies (creates .venv) — stable entrypoint
 install: install-poetry
-	@echo "==> Installing dependencies"
+	@echo "==> Installing dependencies (Python + frontend)"
 	@$(POETRY) install
+	@if [ -f frontend/package.json ]; then \
+	  echo "→ npm install (frontend)"; \
+	  (cd frontend && $(NPM) install); \
+	else \
+	  echo "(!) Skipping: frontend install (no package.json)"; \
+	fi
 
 ## Install Poetry if missing (auto-detect)
 install-poetry:
@@ -83,10 +91,24 @@ test:
 	$(call run_if_exists,$(RUFF),check .)
 	$(call run_if_exists,$(MYPY),src)
 	$(call run_if_exists,$(PYTEST),-q)
+	@if [ -f frontend/package.json ]; then \
+	  echo "→ frontend eslint"; \
+	  (cd frontend && $(NPM) run -s lint) || true; \
+	else \
+	  echo "(!) Skipping: frontend lint (no package.json)"; \
+	fi
 
 ## Code style (if configured)
 lint:
 	$(call run_if_exists,$(RUFF),check .)
+	@if [ -f frontend/package.json ]; then \
+	  echo "→ frontend eslint"; \
+	  (cd frontend && $(NPM) run -s lint); \
+	  echo "→ frontend prettier check"; \
+	  (cd frontend && $(NPM) run -s check-format); \
+	else \
+	  echo "(!) Skipping: frontend lint (no package.json)"; \
+	fi
 
 ## Type checks (if configured)
 typecheck:
@@ -97,6 +119,14 @@ format:
 	$(call run_if_exists,$(RUFF),format .)
 	@# If you prefer black, uncomment the next line and add black to dev deps
 	@# $(POETRY) run black .
+	@if [ -f frontend/package.json ]; then \
+	  echo "→ frontend prettier"; \
+	  (cd frontend && $(NPM) run -s format); \
+	else \
+	  echo "(!) Skipping: frontend format (no package.json)"; \
+	fi
+
+##
 
 ## Export requirements.txt for non-Poetry environments
 export-req:
@@ -113,7 +143,7 @@ clean:
 help:
 	@echo ""
 	@echo "SeedScape Make targets:"
-	@echo "  make install        - Install dependencies (Poetry)"
+	@echo "  make install        - Install dependencies (Poetry + frontend npm)"
 	@echo "  make install-poetry - Autodetect/Install Poetry"
 	@echo "  make dev            - Start dev server with autoreload"
 	@echo "  make run            - Start server without autoreload"

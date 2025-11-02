@@ -10,12 +10,13 @@ Dieses Skript überprüft, ob das Poetry-Paket korrekt konfiguriert ist:
 4. Prüft, ob optionale Verzeichnisse (frontend, rules, data) enthalten sind
 """
 
-import tarfile
 import subprocess
-from pathlib import Path
 import sys
+import tarfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
 
 def run(cmd: list[str]) -> str:
     print(">", " ".join(cmd))
@@ -24,6 +25,7 @@ def run(cmd: list[str]) -> str:
     except subprocess.CalledProcessError as e:
         print(e.output)
         sys.exit(e.returncode)
+
 
 def build_poetry_package():
     dist = ROOT / "dist"
@@ -38,6 +40,7 @@ def build_poetry_package():
         sys.exit(1)
     return tgz_files[0]
 
+
 def inspect_archive(archive_path: Path):
     print(f"🔍 Überprüfe Inhalt von {archive_path.name}")
     found = {"seedscape": False, "frontend": False, "rules": False, "data": False}
@@ -49,6 +52,7 @@ def inspect_archive(archive_path: Path):
                 if f"/{key}/" in member:
                     found[key] = True
     return found
+
 
 def main():
     archive = build_poetry_package()
@@ -62,7 +66,11 @@ def main():
     else:
         print("\nBitte prüfe die 'include'-Sektion in deiner pyproject.toml:")
         print("packages = [{ include = 'seedscape', from = 'src' }]")
-        print("include = [{ path = 'frontend', format = 'sdist' }, { path = 'rules', format = 'sdist' }, { path = 'data', format = 'sdist' }]")
+        print(
+            "include = [{ path = 'frontend', format = 'sdist' }, "
+            "{ path = 'rules', format = 'sdist' }, "
+            "{ path = 'data', format = 'sdist' }]"
+        )
 
 
 if __name__ == "__main__":

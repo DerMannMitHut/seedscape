@@ -95,6 +95,16 @@ Please follow the existing code style (validated through `make test`).
 
 ---
 
+## 🤖 CI & Automation
+
+- GitHub Actions runs lint, type-checks, and tests on pushes/PRs.  
+- The workflow pre-creates Poetry config (`~/.config/pypoetry/config.toml`) to use in-project virtualenvs.  
+- Single entrypoint: `make install` installs Python deps (Poetry) and frontend tooling (npm).  
+- Node is set up (v20) and npm caches are reused; Python venv is cached by lockfile.  
+- CI commands mirror local use: `make install`, then `make test`.
+
+---
+
 ## 📜 License
 
 This project is licensed under the **MIT License**.  
