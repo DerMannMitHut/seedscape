@@ -1,0 +1,17 @@
+{
+  "name": "seedscape-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "SeedScape frontend tooling (ESLint + Prettier)",
+  "scripts": {
+    "lint": "eslint \"**/*.js\"",
+    "format": "prettier --cache --write .",
+    "check-format": "prettier --check ."
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.30.0",
+    "prettier": "^3.3.3"
+  }
+}
