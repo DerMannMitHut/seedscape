@@ -203,8 +203,14 @@ async function onHexClick({ id }) {
     await selectHex(id);
 }
 
+function currentCampaignOrFail() {
+    const v = campaignInput.value.trim();
+    if (!v) throw new Error("No campaign selected");
+    return v;
+}
+
 async function getData(id) {
-    const campaign = campaignInput.value.trim() || "example";
+    const campaign = currentCampaignOrFail();
     const cacheKey = `hex:${campaign}:${id}`;
     const cached = localStorage.getItem(cacheKey);
 
@@ -335,7 +341,11 @@ function escapeHtml(s) {
 
 // ---- Init ----
 labelCoordsEl.checked = state.labelCoords;
-ensureCampaignStyles(campaignInput.value.trim() || "example");
+try {
+    ensureCampaignStyles(currentCampaignOrFail());
+} catch (e) {
+    console.error("Campaign styles not loaded:", e);
+}
 drawGrid();
 refreshCacheList();
 
@@ -387,6 +397,10 @@ function ensureCampaignStyles(campaign) {
 }
 
 campaignInput.addEventListener("change", () => {
-    const campaign = campaignInput.value.trim() || "example";
-    ensureCampaignStyles(campaign);
+    const v = campaignInput.value.trim();
+    if (!v) {
+        console.error("No campaign selected; not loading styles");
+        return;
+    }
+    ensureCampaignStyles(v);
 });
