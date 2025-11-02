@@ -1,5 +1,5 @@
 {
-  "name": "default",
+  "name": "example",
   "seed": "demo-seed-001",
   "description": "Demo campaign with data-driven biomes",
   "biomes": [

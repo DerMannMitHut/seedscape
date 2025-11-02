@@ -204,7 +204,7 @@ async function onHexClick({ id }) {
 }
 
 async function getData(id) {
-    const campaign = campaignInput.value.trim() || "default";
+    const campaign = campaignInput.value.trim() || "example";
     const cacheKey = `hex:${campaign}:${id}`;
     const cached = localStorage.getItem(cacheKey);
 
@@ -335,7 +335,7 @@ function escapeHtml(s) {
 
 // ---- Init ----
 labelCoordsEl.checked = state.labelCoords;
-ensureCampaignStyles(campaignInput.value.trim() || "default");
+ensureCampaignStyles(campaignInput.value.trim() || "example");
 drawGrid();
 refreshCacheList();
 
@@ -387,6 +387,6 @@ function ensureCampaignStyles(campaign) {
 }
 
 campaignInput.addEventListener("change", () => {
-    const campaign = campaignInput.value.trim() || "default";
+    const campaign = campaignInput.value.trim() || "example";
     ensureCampaignStyles(campaign);
 });

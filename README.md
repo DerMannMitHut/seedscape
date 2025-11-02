@@ -112,7 +112,7 @@ Please follow the existing code style (validated through `make test`).
   - `biomes`: list of biome keys (strings)
   - `biomes_css`: relative CSS file (e.g., `biomes.css`)
 - CSS is served at `/api/campaigns/<name>/assets/biomes.css` and loaded by the frontend.
-- Example: see `data/campaigns/default/meta.json` and `data/campaigns/default/biomes.css`.
+- Example: see `data/campaigns/example/meta.json` and `data/campaigns/example/biomes.css`.
 
 
 ## 📜 License

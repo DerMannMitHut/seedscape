@@ -53,4 +53,4 @@
   - `GET /api/campaigns/{campaign}/biomes` → biome keys
   - `GET /api/campaigns/{campaign}/assets/biomes.css` → campaign CSS
 - Fail‑fast: missing `biomes` or CSS triggers clear server‑side errors (500/404) with logs.
-- Example: `data/campaigns/default/meta.json` and `data/campaigns/default/biomes.css`.
+- Example: `data/campaigns/example/meta.json` and `data/campaigns/example/biomes.css`.
