@@ -17,13 +17,25 @@ def get_hex(campaign: str, hex_id: str) -> Hex:
     if not meta.biomes:
         log.error("Campaign '%s' has no biomes configured; cannot generate hex %s", campaign, hex_id)
         raise HTTPException(status_code=500, detail="Campaign has no biomes configured")
+    if not meta.features:
+        log.error("Campaign '%s' has no features configured; cannot generate hex %s", campaign, hex_id)
+        raise HTTPException(status_code=500, detail="Campaign has no features configured")
+    if not meta.encounters:
+        log.error("Campaign '%s' has no encounters configured; cannot generate hex %s", campaign, hex_id)
+        raise HTTPException(status_code=500, detail="Campaign has no encounters configured")
 
     data = storage.load_hex(campaign, hex_id)
     if data:
         return data
 
     try:
-        hex_model = generator.generate_hex(meta.seed, hex_id, biomes=meta.biomes)
+        hex_model = generator.generate_hex(
+            meta.seed,
+            hex_id,
+            biomes=meta.biomes,
+            features=meta.features,
+            encounters=meta.encounters,
+        )
     except ValueError as e:
         log.error("Hex generation failed for %s/%s: %s", campaign, hex_id, e)
         raise HTTPException(status_code=500, detail=str(e))

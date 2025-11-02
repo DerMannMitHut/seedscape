@@ -31,10 +31,25 @@ def campaign_exists(name: str) -> bool:
     return _campaign_path(name).exists()
 
 
-def create_campaign(name: str, seed: str, biomes: list[str], biomes_css: str) -> CampaignMeta:
+def create_campaign(
+    name: str,
+    seed: str,
+    biomes: list[str],
+    biomes_css: str,
+    *,
+    features: list[str],
+    encounters: list[str],
+) -> CampaignMeta:
     path = _campaign_path(name)
     (path / "hexes").mkdir(parents=True, exist_ok=True)
-    meta = CampaignMeta(name=name, seed=seed, biomes=biomes, biomes_css=biomes_css)
+    meta = CampaignMeta(
+        name=name,
+        seed=seed,
+        biomes=biomes,
+        biomes_css=biomes_css,
+        features=features,
+        encounters=encounters,
+    )
     save_campaign_meta(meta)
     return meta
 

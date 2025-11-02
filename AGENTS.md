@@ -42,15 +42,19 @@
 - Validate inputs at API boundaries; prefer Pydantic schemas over raw dicts.
 
 ## Campaign Biomes (Data‑Driven)
-- Each campaign defines biomes and styles under `data/campaigns/<name>/`.
+- Each campaign defines biomes, features, encounters and styles under `data/campaigns/<name>/`.
 - `meta.json` must include:
-  - `biomes`: list of biome keys (strings)
+  - `biomes`: list of biome keys
   - `biomes_css`: relative CSS filename (e.g., `biomes.css`)
+  - `features`: list of feature keys
+  - `encounters`: list of encounter keys
 - CSS is served at `/api/campaigns/<name>/assets/biomes.css` and is dynamically loaded by `frontend/main.js`.
 - API helpers:
   - `GET /api/campaigns` → list campaigns
   - `GET /api/campaigns/{campaign}` → campaign meta
   - `GET /api/campaigns/{campaign}/biomes` → biome keys
+  - `GET /api/campaigns/{campaign}/features` → feature keys
+  - `GET /api/campaigns/{campaign}/encounters` → encounter keys
   - `GET /api/campaigns/{campaign}/assets/biomes.css` → campaign CSS
 - Fail‑fast: missing `biomes` or CSS triggers clear server‑side errors (500/404) with logs.
 - Example: `data/campaigns/example/meta.json` and `data/campaigns/example/biomes.css`.
