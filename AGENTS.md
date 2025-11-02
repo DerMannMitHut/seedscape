@@ -41,6 +41,12 @@
 - Paths can be overridden: `SEEDSCAPE_DATA_DIR`, `SEEDSCAPE_FRONTEND_DIR`.
 - Validate inputs at API boundaries; prefer Pydantic schemas over raw dicts.
 
+## Git Protections
+- Server ruleset protects `main`: PRs + required status checks; no bypass actors.
+- Local guardrail (optional): enable repo hooks once per clone to block direct pushes:
+  - `git config core.hooksPath .githooks`
+  - To override in emergencies: `ALLOW_MAIN_PUSH=1 git push` (not recommended; server rules still block).
+
 ## Campaign Biomes (Data‑Driven)
 - Each campaign defines biomes, features, encounters and styles under `data/campaigns/<name>/`.
 - `meta.json` must include:
