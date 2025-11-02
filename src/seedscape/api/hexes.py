@@ -38,6 +38,6 @@ def get_hex(campaign: str, hex_id: str) -> Hex:
         )
     except ValueError as e:
         log.error("Hex generation failed for %s/%s: %s", campaign, hex_id, e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
     storage.save_hex(campaign, hex_id, hex_model)
     return hex_model

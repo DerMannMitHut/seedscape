@@ -2,6 +2,8 @@ import logging
 import random
 import string
 
+from typing import Annotated
+
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import PlainTextResponse
 
@@ -27,11 +29,11 @@ def get_campaign(campaign: str):
 
 @router.post("/campaigns", response_model=CampaignMeta)
 def create_campaign(
-    name: str = Query(..., min_length=1),
-    biomes: list[str] = Query(..., min_items=1, description="List of biome keys (repeat param)"),
-    biomes_css: str = Query(..., min_length=1, description="Relative CSS filename, e.g., biomes.css"),
-    features: list[str] = Query(..., min_items=1, description="List of feature keys (repeat param)"),
-    encounters: list[str] = Query(..., min_items=1, description="List of encounter keys (repeat param)"),
+    name: Annotated[str, Query(..., min_length=1)],
+    biomes: Annotated[list[str], Query(..., min_items=1, description="List of biome keys (repeat param)")],
+    biomes_css: Annotated[str, Query(..., min_length=1, description="Relative CSS filename, e.g., biomes.css")],
+    features: Annotated[list[str], Query(..., min_items=1, description="List of feature keys (repeat param)")],
+    encounters: Annotated[list[str], Query(..., min_items=1, description="List of encounter keys (repeat param)")],
 ):
     if storage.campaign_exists(name):
         raise HTTPException(status_code=400, detail="Campaign already exists")
