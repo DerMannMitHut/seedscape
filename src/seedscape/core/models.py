@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -36,11 +35,8 @@ class CampaignMeta(BaseModel):
     description: str = ""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     version: str = "0.1"
-    # Data-driven biomes per campaign (required; no defaults)
     biomes: list[str]
-    # Relative CSS filename within the campaign directory (required; no defaults)
     biomes_css: str
-    # Data-driven features and encounters (required; no defaults)
     features: list[str]
     encounters: list[str]
 
