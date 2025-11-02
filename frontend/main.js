@@ -6,12 +6,27 @@ const cacheList = document.querySelector('#cacheList');
 const labelCoordsEl = document.querySelector('#labelCoords');
 const campaignInput = document.querySelector('#campaign');
 const resetBtn = document.querySelector('#resetView');
+const themeBtn = document.querySelector('#toggleTheme');
 
 const HEX_SIZE = 28; // outer radius px
 const GRID_RADIUS = 5; // hexes around origin (roughly 91 hexes)
 
 // Biome classes map — keep in sync with CSS
-const DEFAULT_BIOME = 'plains';
+// Biomes are chosen per-hex. We try to fetch them from the backend once; otherwise use a procedural fallback.
+const biomeIndex = new Map(); // key:"id" → biome string
+
+function biomeFor(q, r, id) {
+  const b = biomeIndex.get(id);
+  if (b) return b;
+  // Fallback procedural pattern (varied but deterministic)
+  const dist = Math.max(Math.abs(q), Math.abs(r), Math.abs(-q - r));
+  const hash = (id || '').split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 0);
+  if (dist <= 1) return 'plains';
+  if (dist === 2) return (hash % 3 === 0) ? 'forest' : 'hills';
+  if (dist === 3) return (hash % 4 === 0) ? 'mountains' : 'desert';
+  if ((q === 0 || q === 1) && r >= -2) return 'water'; // a little river
+  return ['forest','hills','swamp','desert','tundra'][hash % 5];
+}
 
 // ---- Axial helpers (pointy-top) ----
 function axialToPixel(q, r, size) {
@@ -105,7 +120,8 @@ function drawGrid() {
 
     const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
     poly.setAttribute('points', hexPoints(cx, cy, HEX_SIZE));
-    poly.setAttribute('class', `hex ${DEFAULT_BIOME} hex-border`);
+    const biome = biomeFor(q, r, id);
+    poly.setAttribute('class', `hex ${biome} hex-border`);
 
     g.appendChild(poly);
 
@@ -116,8 +132,7 @@ function drawGrid() {
     text.setAttribute('text-anchor', 'middle');
     text.setAttribute('font-size', '12');
     text.setAttribute('font-weight', '700');
-    text.setAttribute('fill', '#0b0b0b');
-    text.textContent = state.labelCoords ? `${q},${r}` : id;
+        text.textContent = state.labelCoords ? `${q},${r}` : id;
     text.setAttribute('class', 'hex-label');
 
     g.appendChild(text);
@@ -275,11 +290,37 @@ function demoHexPayload(id) {
   };
 }
 
+// Try to fetch a biome map for the grid (optional API)
+async function loadBiomeIndex() {
+  try {
+    const campaign = campaignInput.value.trim() || 'default';
+    const res = await fetch(`/api/${encodeURIComponent(campaign)}/hexmap`);
+    if (!res.ok) return;
+    const list = await res.json(); // expect [{id, biome}] or [{q,r,biome}]
+    for (const item of list) {
+      const id = item.id ?? axialToId(item.q, item.r);
+      if (item.biome) biomeIndex.set(id, item.biome);
+    }
+  } catch (_) { /* ignore, fallback will be used */ }
+}
+
 // ---- Init ----
 labelCoordsEl.checked = state.labelCoords;
 drawGrid();
 refreshCacheList();
 
+// Theme toggle
+function applyTheme() {
+  const isDark = document.body.classList.contains('theme-dark');
+  themeBtn.textContent = isDark ? 'Light mode' : 'Dark mode';
+}
+
+themeBtn?.addEventListener('click', () => {
+  document.body.classList.toggle('theme-dark');
+  document.body.classList.toggle('theme-light');
+  applyTheme();
+});
+applyTheme();
+
 // Preselect a central hex for quick demo
 selectHex(axialToId(0,0));
-

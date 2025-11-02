@@ -6,7 +6,7 @@
     <title>SeedScape — Hex Map</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
-  <body>
+  <body class="theme-dark">
     <header>
       <h1>SeedScape — Hex Map</h1>
       <div class="hint">Click a hex to load details from <code>/api/&lt;campaign&gt;/hex/&lt;id&gt;</code>. Drag to pan, wheel to zoom.</div>
@@ -15,6 +15,7 @@
           <input id="campaign" type="text" value="default" />
         </label>
         <button id="resetView">Reset view</button>
+        <button id="toggleTheme" title="Toggle light/dark">Light mode</button>
         <label class="checkbox">
           <input id="labelCoords" type="checkbox" /> Coords labels
         </label>
@@ -23,7 +24,6 @@
 
     <main>
       <section class="map-wrap">
-        <!-- SVG rendered by main.js -->
         <svg id="hexmap" width="960" height="640" role="img" aria-label="Hex map"></svg>
         <div id="tooltip" class="tooltip" hidden></div>
       </section>
@@ -39,10 +39,6 @@
         </details>
       </aside>
     </main>
-
-    <footer>
-      <small>Phase 2 prototype — static frontend. Data is fetched from the backend. Optional in-browser cache via <code>localStorage</code>.</small>
-    </footer>
 
     <script src="./main.js" type="module"></script>
   </body>
