@@ -17,7 +17,7 @@
   --accent: #7ab6e8;
   --border: #242424;
   --map: #0f0f10;
-  --label: #0b0b0b;
+  --label: #e9e9e9;
 }
 
 :root {
@@ -56,13 +56,14 @@ legend { font-weight: 600; }
 .hex.plains { fill: #A3D977; }
 .hex.forest { fill: #4FA36D; }
 .hex.hills { fill: #C4A46A; }
-.hex.mountains { fill: #9A9AA1; }
+.hex.mountain { fill: #9A9AA1; }
 .hex.swamp { fill: #6B8A76; }
 .hex.desert { fill: #E7C66B; }
 .hex.water { fill: #7AB6E8; }
 .hex.tundra { fill: #DCE7F1; }
-.hex-border { stroke: #232323; stroke-width: 1; }
+.hex-border { stroke: var(--border); stroke-width: 1; }
 .hex.selected { stroke: #ffffff; stroke-width: 2; }
+.hex.unloaded { fill: #1a1a1a; }
 
 .hex-label { fill: var(--label); }
 
