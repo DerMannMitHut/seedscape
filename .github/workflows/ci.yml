@@ -27,16 +27,24 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry
-        run: make install-poetry
+      - name: Pre-create Poetry config
+        run: |
+          mkdir -p "$HOME/.config/pypoetry"
+          cat > "$HOME/.config/pypoetry/config.toml" <<'EOF'
+          [virtualenvs]
+          create = true
+          in-project = true
+          EOF
 
-      - name: Add Poetry to PATH
+      - name: Add Poetry to PATH (default install location)
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Configure Poetry
-        run: |
-          poetry config virtualenvs.create true
-          poetry config virtualenvs.in-project true
+      - name: Set up Node.js (for frontend tooling)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Cache virtualenv
         id: cache-venv
@@ -53,7 +61,7 @@ jobs:
           path: ~/.cache/pip
           key: pip-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Install dependencies (Makefile handles Poetry)
+      - name: Install dependencies (Makefile handles Poetry & npm)
         run: make install
 
       - name: Run tests, linters, and type checks
