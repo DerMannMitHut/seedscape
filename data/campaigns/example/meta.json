@@ -13,18 +13,4 @@
     "tundra"
   ],
   "biomes_css": "biomes.css"
-  ,
-  "features": [
-    "none",
-    "ruins",
-    "village",
-    "tower",
-    "river crossing"
-  ],
-  "encounters": [
-    "none",
-    "bandits",
-    "wolves",
-    "travelers"
-  ]
 }

@@ -109,10 +109,8 @@ Please follow the existing code style (validated through `make test`).
 
 - Each campaign defines its own biomes and styles in `data/campaigns/<name>/`.
 - Required in `meta.json`:
-  - `biomes`: list of biome keys
+  - `biomes`: list of biome keys (strings)
   - `biomes_css`: relative CSS file (e.g., `biomes.css`)
-  - `features`: list of feature keys
-  - `encounters`: list of encounter keys
 - CSS is served at `/api/campaigns/<name>/assets/biomes.css` and loaded by the frontend.
 - Example: see `data/campaigns/example/meta.json` and `data/campaigns/example/biomes.css`.
 
