@@ -10,11 +10,12 @@
 - Utility scripts in `scripts/`; rules/config in `rules/`
 
 ## Build, Test, and Development Commands
-- `make install` — install deps via Poetry (creates `.venv`).
+- `make install` — install deps via Poetry (creates `.venv`) and run `npm install` in `frontend/` if present.
 - `make dev` — run FastAPI with autoreload; watches `src` and `rules`.
 - `make run` — run server without reload.
 - `make test` — run ruff, mypy, and pytest (skips tools not installed).
-- `make lint` / `make typecheck` / `make format` — style, types, and formatting.
+- `make lint` — ruff (Python) + ESLint and Prettier check (frontend).
+- `make format` — ruff format (Python) + Prettier write (frontend).
 - `make clean` — remove caches and local artifacts.
 - Config via `.env`/`.env.local` (e.g., `HOST=127.0.0.1`, `PORT=8000`, `APP_MODULE=seedscape.main:app`, `SEEDSCAPE_DATA_DIR=...`).
 
@@ -39,3 +40,17 @@
 - Never commit secrets. Copy `.env.example` to `.env` and customize locally.
 - Paths can be overridden: `SEEDSCAPE_DATA_DIR`, `SEEDSCAPE_FRONTEND_DIR`.
 - Validate inputs at API boundaries; prefer Pydantic schemas over raw dicts.
+
+## Campaign Biomes (Data‑Driven)
+- Each campaign defines biomes and styles under `data/campaigns/<name>/`.
+- `meta.json` must include:
+  - `biomes`: list of biome keys (strings)
+  - `biomes_css`: relative CSS filename (e.g., `biomes.css`)
+- CSS is served at `/api/campaigns/<name>/assets/biomes.css` and is dynamically loaded by `frontend/main.js`.
+- API helpers:
+  - `GET /api/campaigns` → list campaigns
+  - `GET /api/campaigns/{campaign}` → campaign meta
+  - `GET /api/campaigns/{campaign}/biomes` → biome keys
+  - `GET /api/campaigns/{campaign}/assets/biomes.css` → campaign CSS
+- Fail‑fast: missing `biomes` or CSS triggers clear server‑side errors (500/404) with logs.
+- Example: `data/campaigns/default/meta.json` and `data/campaigns/default/biomes.css`.
