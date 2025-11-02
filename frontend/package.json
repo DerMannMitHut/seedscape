@@ -2,6 +2,7 @@
   "name": "seedscape-frontend",
   "private": true,
   "version": "0.1.1",
+  "type": "module",
   "description": "SeedScape frontend tooling (ESLint + Prettier)",
   "scripts": {
     "lint": "eslint \"**/*.js\"",
