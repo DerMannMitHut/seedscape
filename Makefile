@@ -104,6 +104,8 @@ lint:
 	@if [ -f frontend/package.json ]; then \
 	  echo "→ frontend eslint"; \
 	  (cd frontend && $(NPM) run -s lint); \
+	  echo "→ frontend prettier check"; \
+	  (cd frontend && $(NPM) run -s check-format); \
 	else \
 	  echo "(!) Skipping: frontend lint (no package.json)"; \
 	fi
