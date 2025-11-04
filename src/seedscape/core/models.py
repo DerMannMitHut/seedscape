@@ -44,6 +44,6 @@ class CampaignMeta(BaseModel):
 class UserAccount(BaseModel):
     username: str
     password_hash: str
-    campaigns: list[str] = Field(default_factory=lambda: list)
+    campaigns: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     version: str = "0.1"

@@ -100,7 +100,7 @@ test:
 
 ## Code style (if configured)
 lint:
-	$(call run_if_exists,$(RUFF),check .)
+	$(call run_if_exists,$(RUFF),check . --fix)
 	@if [ -f frontend/package.json ]; then \
 	  echo "→ frontend eslint"; \
 	  (cd frontend && $(NPM) run -s lint); \
