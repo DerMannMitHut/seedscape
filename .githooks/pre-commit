@@ -15,15 +15,12 @@ fi
 echo "[pre-commit] make format"
 make format
 
-# Re-stage any files changed by formatters
-git add -A
-
 echo "[pre-commit] make lint"
 make lint
 
-if [[ "${HOOK_RUN_TESTS:-0}" == "1" ]]; then
-  echo "[pre-commit] make test"
-  make test
-fi
+git add -A
+
+echo "[pre-commit] make test"
+make test
 
 exit 0
