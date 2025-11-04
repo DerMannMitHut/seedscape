@@ -44,7 +44,7 @@ fi
 endef
 
 define run_if_exists
-@if command -v $(1) >/dev/null 2>&1; then \
+@if $(POETRY) run which $(1) >/dev/null 2>&1; then \
   echo "→ $(1)"; \
   $(POETRY) run $(1) $(2); \
 else \
@@ -58,7 +58,7 @@ endef
 ## Install dependencies (creates .venv) — stable entrypoint
 install: install-poetry
 	@echo "==> Installing dependencies (Python + frontend)"
-	@$(POETRY) install
+	@$(POETRY) install --with dev
 	@if [ -f frontend/package.json ]; then \
 	  echo "→ npm install (frontend)"; \
 	  (cd frontend && $(NPM) install); \
