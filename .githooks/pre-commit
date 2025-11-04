@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Pre-commit hook that delegates to Make targets for consistency.
-# Runs project-wide format, then re-stages, then lint; optionally tests.
+# Runs project-wide format, then re-stages, then lint.
 
 set -euo pipefail
 
@@ -18,9 +18,7 @@ make format
 echo "[pre-commit] make lint"
 make lint
 
+# Re-stage any changes after formatting
 git add -A
-
-echo "[pre-commit] make test"
-make test
 
 exit 0

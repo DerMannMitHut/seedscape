@@ -45,8 +45,15 @@
 ## Git Protections
 - Server ruleset protects `main`: PRs + required status checks; no bypass actors.
 - Local hooks (optional, enable once per clone): `git config core.hooksPath .githooks`
-  - `pre-commit`: runs `make format`, re-stages changes, then `make lint`. Optional tests with `HOOK_RUN_TESTS=1`.
-  - `pre-push`: blocks direct pushes to `main`. Override only in emergencies: `ALLOW_MAIN_PUSH=1 git push` (server rules still block).
+  - `pre-commit`: runs `make format`, re-stages changes, then `make lint`.
+  - `pre-push`: runs `make test` and blocks direct pushes to `main`. Overrides:
+    - Skip tests: `HOOK_SKIP_TESTS=1 git push`
+    - Allow main (emergency only): `ALLOW_MAIN_PUSH=1 git push` (server rules still block)
+
+## IDE Setup (PyCharm)
+- Use the Poetry venv: run `make install`, then select `.venv` as the interpreter in Settings → Project → Python Interpreter.
+- Mark `src/` as Sources Root to resolve `from seedscape...` during inspections.
+- Alternatively set `PYTHONPATH=$PROJECT_DIR$/src` in Run/Debug configs (less preferred; interpreter via Poetry is recommended).
 
 ## Campaign Biomes (Data‑Driven)
 - Each campaign defines biomes, features, encounters and styles under `data/campaigns/<name>/`.
