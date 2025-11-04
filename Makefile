@@ -136,7 +136,18 @@ export-req:
 ## Clean local artifacts for a fresh setup
 clean:
 	@echo "==> Cleaning local artifacts"
-	@rm -rf .venv dist build .pytest_cache .mypy_cache .ruff_cache __pycache__ **/__pycache__ *.pyc *.pyo *.log
+	@rm -rf \
+		.venv \
+		dist build \
+		.pytest_cache .mypy_cache .ruff_cache \
+		__pycache__ **/__pycache__ \
+		*.pyc *.pyo *.log \
+		frontend/node_modules \
+		frontend/dist \
+		frontend/build \
+		frontend/.vite \
+		frontend/.parcel-cache \
+		frontend/.next
 	@find . -name '*.pyc' -delete -o -name '*.pyo' -delete
 
 ## Help: list targets
