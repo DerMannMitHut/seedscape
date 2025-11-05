@@ -136,7 +136,7 @@ export-req:
 ## Clean local artifacts for a fresh setup
 clean:
 	@echo "==> Cleaning local artifacts"
-	@rm -rf \
+	@rm -rfv \
 		.venv \
 		dist build \
 		.pytest_cache .mypy_cache .ruff_cache \

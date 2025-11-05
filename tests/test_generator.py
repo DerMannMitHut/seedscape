@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 import pytest
 
 from seedscape.core import generator
@@ -12,8 +14,9 @@ def test_generate_hex_uses_lists_and_is_deterministic():
     features = ["f1", "f2"]
     encounters = ["e1", "e2"]
 
-    h1 = generator.generate_hex(seed, hex_id, biomes=biomes, features=features, encounters=encounters)
-    h2 = generator.generate_hex(seed, hex_id, biomes=biomes, features=features, encounters=encounters)
+    fixed_now = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    h1 = generator.generate_hex(seed, hex_id, biomes=biomes, features=features, encounters=encounters, now=fixed_now)
+    h2 = generator.generate_hex(seed, hex_id, biomes=biomes, features=features, encounters=encounters, now=fixed_now)
 
     assert h1 == h2
     assert h1.biome in biomes
