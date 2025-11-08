@@ -2,29 +2,29 @@
   "name": "example",
   "seed": "demo-seed-001",
   "description": "Demo campaign with data-driven biomes",
-  "biomes": [
-    "plains",
-    "forest",
-    "hills",
-    "mountain",
-    "swamp",
-    "desert",
-    "water",
-    "tundra"
+  "biome_types": [
+    {"name": "plains",   "min_altitude": -10,  "max_altitude": 200,  "min_temperature": -5,  "max_temperature": 40,  "min_humidity": 10,  "max_humidity": 70},
+    {"name": "forest",   "min_altitude": 0,    "max_altitude": 500,  "min_temperature": -10, "max_temperature": 35,  "min_humidity": 40,  "max_humidity": 100},
+    {"name": "hills",    "min_altitude": 200,  "max_altitude": 1200, "min_temperature": -15, "max_temperature": 30,  "min_humidity": 20,  "max_humidity": 80},
+    {"name": "mountain", "min_altitude": 800,  "max_altitude": 4000, "min_temperature": -30, "max_temperature": 15,  "min_humidity": 0,   "max_humidity": 70},
+    {"name": "swamp",    "min_altitude": -20,  "max_altitude": 100,  "min_temperature": 0,   "max_temperature": 40,  "min_humidity": 60,  "max_humidity": 100},
+    {"name": "desert",   "min_altitude": -50,  "max_altitude": 800,  "min_temperature": 5,   "max_temperature": 50,  "min_humidity": 0,   "max_humidity": 30},
+    {"name": "water",    "min_altitude": -500, "max_altitude": 0,    "min_temperature": -5,  "max_temperature": 35,  "min_humidity": 80,  "max_humidity": 100},
+    {"name": "tundra",   "min_altitude": 0,    "max_altitude": 800,  "min_temperature": -40, "max_temperature": 5,   "min_humidity": 10,  "max_humidity": 60}
   ],
-  "biomes_css": "biomes.css"
-  ,
-  "features": [
-    "none",
-    "ruins",
-    "village",
-    "tower",
-    "river crossing"
+  "biomes_css": "biomes.css",
+  "feature_types": [
+    {"name": "none"},
+    {"name": "ruins"},
+    {"name": "village"},
+    {"name": "tower"},
+    {"name": "river crossing"}
   ],
-  "encounters": [
-    "none",
-    "bandits",
-    "wolves",
-    "travelers"
-  ]
+  "encounter_types": [
+    {"name": "none"},
+    {"name": "bandits"},
+    {"name": "wolves"},
+    {"name": "travelers"}
+  ],
+  "base_temperature": 15.0
 }
