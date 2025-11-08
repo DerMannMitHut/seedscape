@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from seedscape.core.envconfig import SEEDSCAPE_DATA_DIR
-from seedscape.core.models import CampaignMeta, Hex
+from seedscape.core.models import BiomeType, CampaignMeta, EncounterType, FeatureType, Hex
 
 
 def _detect_data_dir() -> Path:
@@ -34,21 +34,21 @@ def campaign_exists(name: str) -> bool:
 def create_campaign(
     name: str,
     seed: str,
-    biomes: list[str],
+    biome_types: list[BiomeType],
     biomes_css: str,
     *,
-    features: list[str],
-    encounters: list[str],
+    feature_types: list[FeatureType],
+    encounter_types: list[EncounterType],
 ) -> CampaignMeta:
     path = _campaign_path(name)
     (path / "hexes").mkdir(parents=True, exist_ok=True)
     meta = CampaignMeta(
         name=name,
         seed=seed,
-        biomes=biomes,
+        biome_types=biome_types,
         biomes_css=biomes_css,
-        features=features,
-        encounters=encounters,
+        feature_types=feature_types,
+        encounter_types=encounter_types,
     )
     save_campaign_meta(meta)
     return meta

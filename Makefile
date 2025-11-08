@@ -93,7 +93,7 @@ test:
 	$(call run_if_exists,$(PYTEST),-q)
 	@if [ -f frontend/package.json ]; then \
 	  echo "→ frontend eslint"; \
-	  (cd frontend && $(NPM) run -s lint) || true; \
+	  (cd frontend && $(NPM) run -s lint); \
 	else \
 	  echo "(!) Skipping: frontend lint (no package.json)"; \
 	fi
