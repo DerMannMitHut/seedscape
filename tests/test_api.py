@@ -89,4 +89,4 @@ def test_hex_endpoint(tmp_path):
     assert r.status_code == 200
     data = r.json()
     assert data["id"] == "A1"
-    assert data["biome"] == "b1"
+    assert data["biome"]["name"] == "b1"

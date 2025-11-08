@@ -15,12 +15,15 @@ class BiomeType(BaseModel):
     max_altitude: float
     min_temperature: float
     max_temperature: float
+    min_humidity: float
+    max_humidity: float
 
 
-class Biome(BiomeName):
+class Biome(BaseModel):
     name: BiomeName
     altitude: float
     temperature: float
+    humidity: float
 
 
 FeatureName = str
@@ -69,11 +72,11 @@ class CampaignMeta(BaseModel):
     description: str = ""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     version: str = "0.1"
-    biome_types: list[BiomeType]
+    biome_types: list[BiomeType] = Field(..., min_length=1)
     biomes_css: str
-    feature_types: list[FeatureType]
-    encounter_types: list[EncounterType]
-    base_temperature: int
+    feature_types: list[FeatureType] = Field(..., min_length=1)
+    encounter_types: list[EncounterType] = Field(..., min_length=1)
+    base_temperature: float
 
 
 class UserAccount(BaseModel):

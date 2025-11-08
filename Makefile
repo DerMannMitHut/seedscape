@@ -78,12 +78,12 @@ dev:
 	for d in $(RELOAD_DIRS); do RELOAD_DIR_FLAGS="$$RELOAD_DIR_FLAGS --reload-dir $$d"; done; \
 	EXCLUDE_FLAGS=""; \
 	for x in $(RELOAD_EXCLUDES); do EXCLUDE_FLAGS="$$EXCLUDE_FLAGS --reload-exclude $$x"; done; \
-	$(POETRY) run $(UVICORN) $(APP_MODULE) --host $(HOST) --port $(PORT) --reload $$RELOAD_DIR_FLAGS $$EXCLUDE_FLAGS
+	PYTHONPATH="src:$$PYTHONPATH" $(POETRY) run $(UVICORN) $(APP_MODULE) --host $(HOST) --port $(PORT) --reload $$RELOAD_DIR_FLAGS $$EXCLUDE_FLAGS
 
 ## Run server normally (no autoreload)
 run:
 	@echo "==> Starting server"
-	@$(POETRY) run $(UVICORN) $(APP_MODULE) --host $(HOST) --port $(PORT)
+	@PYTHONPATH="src:$$PYTHONPATH" $(POETRY) run $(UVICORN) $(APP_MODULE) --host $(HOST) --port $(PORT)
 
 ## Run tests, lints, and type checks (skips tools that aren't installed)
 test:

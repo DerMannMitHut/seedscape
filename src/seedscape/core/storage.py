@@ -49,15 +49,16 @@ def create_campaign(
         biomes_css=biomes_css,
         feature_types=feature_types,
         encounter_types=encounter_types,
+        base_temperature=15,
     )
     save_campaign_meta(meta)
     return meta
 
 
-def load_campaign_meta(campaign: str) -> CampaignMeta | None:
-    path = _campaign_path(campaign) / "meta.json"
+def load_campaign_meta(campaign_name: str) -> CampaignMeta:
+    path = _campaign_path(campaign_name) / "meta.json"
     if not path.exists():
-        return None
+        raise ValueError(f"Campaign {campaign_name} not found.")
     data = json.loads(path.read_text(encoding="utf-8"))
     return CampaignMeta.model_validate(data)
 

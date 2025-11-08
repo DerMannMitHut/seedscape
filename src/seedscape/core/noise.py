@@ -1,41 +1,44 @@
 import hashlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
+from typing import TYPE_CHECKING
 
 from seedscape.core import _math
-from seedscape.core.models import CampaignMeta
+
+if TYPE_CHECKING:  # avoid importing heavy pydantic models at runtime
+    from seedscape.core.models import CampaignMeta
 
 
-def _normalize_key(seed: str) -> bytes:
+def _get_blake2b_key(seed: str) -> bytes:
     return hashlib.blake2b(seed.encode("utf-8"), digest_size=hashlib.blake2b.MAX_KEY_SIZE).digest()
 
 
-def _normalize_salt(kind: str) -> bytes:
+def _get_blake2b_salt(kind: str) -> bytes:
     return hashlib.blake2b(kind.encode("utf-8"), digest_size=hashlib.blake2b.SALT_SIZE).digest()
 
 
-def _normalize_person(person: str) -> bytes:
+def _get_blake2b_person(person: str) -> bytes:
     return hashlib.blake2b(person.encode("utf-8"), digest_size=hashlib.blake2b.PERSON_SIZE).digest()
 
 
-@dataclass
+@dataclass(frozen=True)
 class NoiseConfig:
-    salt: bytes
+    salt_label: str
     freq_base: float
     octaves: int
     lacunarity: float
     gain: float
+    # Derived from salt_label; used by blake2b as salt
+    salt: bytes = field(init=False)
 
-    def __init__(self, salt: str, freq_base: float, octaves: int, lacunarity: float, gain: float):
-        self.salt = _normalize_salt(salt)
-
-        if freq_base < 0 or freq_base > 1:
-            raise ValueError(f"freq_base expected from [0..1], but is {freq_base}")
-        self.freq_base = freq_base
-
-        self.octaves = octaves
-        self.lacunarity = lacunarity
-        self.gain = gain
+    def __post_init__(self):
+        # Validate parameters
+        if self.freq_base <= 0 or self.freq_base > 1:
+            raise ValueError(f"freq_base expected from (0..1], but is {self.freq_base}")
+        if self.octaves < 1:
+            raise ValueError(f"octaves expected to be 1 or greater, but is {self.octaves}")
+        # Compute salt bytes from the label
+        object.__setattr__(self, "salt", _get_blake2b_salt(self.salt_label))
 
 
 class NoiseType(Enum):
@@ -43,23 +46,18 @@ class NoiseType(Enum):
     humidity = NoiseConfig("humidity", freq_base=0.05, octaves=4, lacunarity=2.0, gain=0.5)
 
 
-PERSON = _normalize_person("SeedScape")
+PERSON = _get_blake2b_person("SeedScape")
 DIRECTIONS = [(+1, 0), (+1, -1), (0, -1), (-1, 0), (-1, +1), (0, +1)]
-MIN_ALTITUDE = -100
-MAX_ALTITUDE = 10000
 HEX_DIAMETER = 5000
-HEX_ROW_DISTANCE = HEX_DIAMETER * 0.75
-MAX_TEMP_DIFF = 1
-MIN_TEMP_DIFF = -1
 
 
 class Noise:
-    def __init__(self, campaign: CampaignMeta):
-        self.__key = _normalize_key(campaign.seed)
+    def __init__(self, campaign: "CampaignMeta"):
+        self._key = _get_blake2b_key(campaign.seed)
         self._campaign = campaign
 
     def _shuffle(self, nconfig: NoiseConfig, *values: int) -> int:
-        h = hashlib.blake2b(key=self.__key, salt=nconfig.salt, person=PERSON, digest_size=8)
+        h = hashlib.blake2b(key=self._key, salt=nconfig.salt, person=PERSON, digest_size=8)
         for v in values:
             h.update(v.to_bytes(8, "big", signed=True))
         return int.from_bytes(h.digest(), "big", signed=False)
