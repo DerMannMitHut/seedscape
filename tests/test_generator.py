@@ -2,37 +2,63 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-import pytest
-
 from seedscape.core import generator
+from seedscape.core.models import (
+    BiomeType,
+    CampaignMeta,
+    EncounterType,
+    FeatureType,
+)
 
 
-def test_generate_hex_uses_lists_and_is_deterministic():
-    seed = "abc"
+def make_campaign(seed: str = "abc") -> CampaignMeta:
+    return CampaignMeta(
+        name="test",
+        seed=seed,
+        description="",
+        biome_types=[
+            BiomeType(
+                name="x",
+                min_altitude=0,
+                max_altitude=10,
+                min_temperature=0,
+                max_temperature=10,
+                min_humidity=0,
+                max_humidity=10,
+            ),
+            BiomeType(
+                name="y",
+                min_altitude=0,
+                max_altitude=10,
+                min_temperature=0,
+                max_temperature=10,
+                min_humidity=0,
+                max_humidity=10,
+            ),
+        ],
+        biomes_css="biomes.css",
+        feature_types=[FeatureType(name="f1"), FeatureType(name="f2")],
+        encounter_types=[EncounterType(name="e1"), EncounterType(name="e2")],
+        base_temperature=20.0,
+    )
+
+
+def test_generate_hex_is_deterministic_and_valid_models():
     hex_id = "H4"
-    biomes = ["x", "y"]
-    features = ["f1", "f2"]
-    encounters = ["e1", "e2"]
-
     fixed_now = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
-    h1 = generator.generate_hex(seed, hex_id, biomes=biomes, features=features, encounters=encounters, now=fixed_now)
-    h2 = generator.generate_hex(seed, hex_id, biomes=biomes, features=features, encounters=encounters, now=fixed_now)
+    camp = make_campaign()
+
+    h1 = generator.generate_hex(camp, hex_id, now=fixed_now)
+    h2 = generator.generate_hex(camp, hex_id, now=fixed_now)
 
     assert h1 == h2
-    assert h1.biome in biomes
-    assert h1.feature in features
-    assert h1.encounter in encounters
-
-
-@pytest.mark.parametrize(
-    "kwargs, msg",
-    [
-        ({"features": ["f"], "encounters": ["e"]}, "biomes"),
-        ({"biomes": ["b"], "encounters": ["e"]}, "features"),
-        ({"biomes": ["b"], "features": ["f"]}, "encounters"),
-    ],
-)
-def test_generate_hex_fail_fast_on_missing_lists(kwargs, msg):
-    with pytest.raises(ValueError) as ei:
-        generator.generate_hex("s", "I5", **kwargs)
-    assert msg in str(ei.value)
+    assert h1.id == hex_id
+    assert h1.discovered is True
+    assert h1.created_at == fixed_now
+    # Values selected from types lists
+    biome_names = {t.name for t in camp.biome_types}
+    feature_names = {t.name for t in camp.feature_types}
+    encounter_names = {t.name for t in camp.encounter_types}
+    assert h1.biome.name in biome_names
+    assert h1.features[0].name in feature_names
+    assert h1.encounter.name in encounter_names

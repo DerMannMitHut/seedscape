@@ -1,13 +1,12 @@
 import logging
-import random
-import string
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import PlainTextResponse
+from pydantic import ValidationError
 
 from seedscape.core import storage
-from seedscape.core.models import CampaignMeta
+from seedscape.core.models import BiomeType, CampaignMeta, EncounterType, FeatureType
 
 router = APIRouter()
 log = logging.getLogger(__name__)
@@ -18,72 +17,82 @@ def list_campaigns():
     return storage.list_campaigns()
 
 
-@router.get("/campaigns/{campaign}", response_model=CampaignMeta)
-def get_campaign(campaign: str):
-    meta = storage.load_campaign_meta(campaign)
-    if not meta:
-        raise HTTPException(status_code=404, detail="Campaign not found")
-    return meta
+@router.get("/campaigns/{campaign_name}", response_model=CampaignMeta)
+def get_campaign(campaign_name: str) -> CampaignMeta:
+    try:
+        campaign = storage.load_campaign_meta(campaign_name)
+    except ValidationError as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+    except RuntimeError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    return campaign
+
+
+@router.get("/campaigns/{campaign_name}/biomes", response_model=list[str])
+def get_campaign_biomes(campaign_name: str):
+    return [bt.name for bt in get_campaign(campaign_name).biome_types]
+
+
+@router.get("/campaigns/{campaign_name}/features", response_model=list[str])
+def get_campaign_features(campaign_name: str):
+    return [ft.name for ft in get_campaign(campaign_name).feature_types]
+
+
+@router.get("/campaigns/{campaign_name}/encounters", response_model=list[str])
+def get_campaign_encounters(campaign_name: str):
+    return [et.name for et in get_campaign(campaign_name).encounter_types]
+
+
+@router.get("/campaigns/{campaign_name}/assets/biomes.css", response_class=PlainTextResponse)
+def get_campaign_biomes_css(campaign_name: str):
+    css_path = storage.campaign_biomes_css_path(campaign_name)
+    if not css_path:
+        log.error("Campaign '%s' biomes CSS not found", campaign_name)
+        raise HTTPException(status_code=404, detail="CSS not found for campaign")
+    return PlainTextResponse(css_path.read_text(encoding="utf-8"), media_type="text/css")
 
 
 @router.post("/campaigns", response_model=CampaignMeta)
 def create_campaign(
-    name: Annotated[str, Query(..., min_length=1)],
-    biomes: Annotated[list[str], Query(..., min_items=1, description="List of biome keys (repeat param)")],
-    biomes_css: Annotated[str, Query(..., min_length=1, description="Relative CSS filename, e.g., biomes.css")],
-    features: Annotated[list[str], Query(..., min_items=1, description="List of feature keys (repeat param)")],
-    encounters: Annotated[list[str], Query(..., min_items=1, description="List of encounter keys (repeat param)")],
-):
-    if storage.campaign_exists(name):
-        raise HTTPException(status_code=400, detail="Campaign already exists")
-    seed = "".join(random.choices(string.ascii_letters + string.digits, k=16))
-    return storage.create_campaign(
-        name,
-        seed,
-        biomes=biomes,
-        biomes_css=biomes_css,
-        features=features,
-        encounters=encounters,
-    )
+    name: Annotated[str, Query(...)],
+    biomes: Annotated[list[str], Query(...)],
+    biomes_css: Annotated[str, Query(...)],
+    features: Annotated[list[str], Query(...)],
+    encounters: Annotated[list[str], Query(...)],
+) -> CampaignMeta:
+    if not name:
+        raise HTTPException(status_code=400, detail="name is required")
+    if not biomes:
+        raise HTTPException(status_code=400, detail="biomes is required")
+    if not features:
+        raise HTTPException(status_code=400, detail="features is required")
+    if not encounters:
+        raise HTTPException(status_code=400, detail="encounters is required")
 
+    biome_types = [
+        BiomeType(
+            name=b,
+            min_altitude=0,
+            max_altitude=1,
+            min_temperature=0,
+            max_temperature=1,
+            min_humidity=0,
+            max_humidity=1,
+        )
+        for b in biomes
+    ]
+    feature_types = [FeatureType(name=f) for f in features]
+    encounter_types = [EncounterType(name=e) for e in encounters]
 
-@router.get("/campaigns/{campaign}/biomes", response_model=list[str])
-def get_campaign_biomes(campaign: str):
-    meta = storage.load_campaign_meta(campaign)
-    if not meta:
-        raise HTTPException(status_code=404, detail="Campaign not found")
-    if not meta.biomes:
-        log.error("Campaign '%s' has no biomes configured", campaign)
-        raise HTTPException(status_code=500, detail="Campaign has no biomes configured")
-    return meta.biomes
-
-
-@router.get("/campaigns/{campaign}/features", response_model=list[str])
-def get_campaign_features(campaign: str):
-    meta = storage.load_campaign_meta(campaign)
-    if not meta:
-        raise HTTPException(status_code=404, detail="Campaign not found")
-    if not meta.features:
-        log.error("Campaign '%s' has no features configured", campaign)
-        raise HTTPException(status_code=500, detail="Campaign has no features configured")
-    return meta.features
-
-
-@router.get("/campaigns/{campaign}/encounters", response_model=list[str])
-def get_campaign_encounters(campaign: str):
-    meta = storage.load_campaign_meta(campaign)
-    if not meta:
-        raise HTTPException(status_code=404, detail="Campaign not found")
-    if not meta.encounters:
-        log.error("Campaign '%s' has no encounters configured", campaign)
-        raise HTTPException(status_code=500, detail="Campaign has no encounters configured")
-    return meta.encounters
-
-
-@router.get("/campaigns/{campaign}/assets/biomes.css", response_class=PlainTextResponse)
-def get_campaign_biomes_css(campaign: str):
-    css_path = storage.campaign_biomes_css_path(campaign)
-    if not css_path:
-        log.error("Campaign '%s' biomes CSS not found", campaign)
-        raise HTTPException(status_code=404, detail="CSS not found for campaign")
-    return PlainTextResponse(css_path.read_text(encoding="utf-8"), media_type="text/css")
+    try:
+        meta = storage.create_campaign(
+            name,
+            seed=name,  # use name as default seed for API-based creation
+            biome_types=biome_types,
+            biomes_css=biomes_css,
+            feature_types=feature_types,
+            encounter_types=encounter_types,
+        )
+    except Exception as e:  # pydantic validation or storage errors
+        raise HTTPException(status_code=500, detail=str(e)) from e
+    return meta

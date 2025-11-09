@@ -3,6 +3,16 @@ from __future__ import annotations
 import importlib
 from pathlib import Path
 
+from seedscape.core.models import (
+    Biome,
+    BiomeType,
+    Encounter,
+    EncounterType,
+    Feature,
+    FeatureType,
+    Hex,
+)
+
 
 def setup_storage(tmp_path: Path, monkeypatch):
     # Point data dir to tmp and reload modules to rebind constants
@@ -23,10 +33,29 @@ def test_campaign_lifecycle(tmp_path, monkeypatch):
     meta = storage.create_campaign(
         "c1",
         seed="s",
-        biomes=["forest", "plains"],
+        biome_types=[
+            BiomeType(
+                name="forest",
+                min_altitude=0,
+                max_altitude=1,
+                min_temperature=0,
+                max_temperature=1,
+                min_humidity=0,
+                max_humidity=1,
+            ),
+            BiomeType(
+                name="plains",
+                min_altitude=0,
+                max_altitude=1,
+                min_temperature=0,
+                max_temperature=1,
+                min_humidity=0,
+                max_humidity=1,
+            ),
+        ],
         biomes_css="biomes.css",
-        features=["none", "ruins"],
-        encounters=["none", "bandits"],
+        feature_types=[FeatureType(name="none"), FeatureType(name="ruins")],
+        encounter_types=[EncounterType(name="none"), EncounterType(name="bandits")],
     )
     assert meta.name == "c1"
     assert "c1" in storage.list_campaigns()
@@ -48,18 +77,32 @@ def test_hex_load_save(tmp_path, monkeypatch):
     storage.create_campaign(
         "c2",
         seed="s2",
-        biomes=["a"],
+        biome_types=[
+            BiomeType(
+                name="a",
+                min_altitude=0,
+                max_altitude=1,
+                min_temperature=0,
+                max_temperature=1,
+                min_humidity=0,
+                max_humidity=1,
+            )
+        ],
         biomes_css="b.css",
-        features=["f"],
-        encounters=["e"],
+        feature_types=[FeatureType(name="f")],
+        encounter_types=[EncounterType(name="e")],
     )
     assert storage.load_hex("c2", "A1") is None
 
-    from seedscape.core.models import Hex
-
-    h = Hex(id="A1", biome="a", feature="f", encounter="e", discovered=True)
+    h = Hex(
+        id="A1",
+        biome=Biome(name="a", altitude=0.0, temperature=0.0, humidity=0.0),
+        features=[Feature(name="f")],
+        encounter=Encounter(name="e"),
+        discovered=True,
+    )
     storage.save_hex("c2", "A1", h)
     got = storage.load_hex("c2", "A1")
     assert got is not None
     assert got.id == "A1"
-    assert got.biome == "a"
+    assert got.biome.name == "a"
