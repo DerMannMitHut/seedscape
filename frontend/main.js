@@ -209,23 +209,38 @@ function currentCampaignOrFail() {
     return v;
 }
 
+function cacheKey(campaign, id, version) {
+    return `hex:${campaign}:${id}:${version}`;
+}
+
 async function getData(id) {
     const campaign = currentCampaignOrFail();
-    const cacheKey = `hex:${campaign}:${id}`;
-    const cached = localStorage.getItem(cacheKey);
+    const latestVersion = localStorage.getItem("hex:latest-version");
 
-    if (cached) {
-        const data = JSON.parse(cached);
-        const isCached = true;
-        return { data, isCached };
-    } else {
-        const res = await fetch(`/api/${encodeURIComponent(campaign)}/hex/${encodeURIComponent(id)}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        localStorage.setItem(cacheKey, JSON.stringify(data));
-        const isCached = false;
-        return { data, isCached };
+    if (latestVersion) {
+        const key = cacheKey(campaign, id, latestVersion);
+        const cached = localStorage.getItem(key);
+        if (cached) {
+            const data = JSON.parse(cached);
+            return { data, isCached: true };
+        }
     }
+
+    const res = await fetch(`/api/${encodeURIComponent(campaign)}/hex/${encodeURIComponent(id)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const ver = String(data.version ?? "0");
+
+    // Purge older cached versions for this (campaign,id)
+    for (const k of Object.keys(localStorage)) {
+        if (k.startsWith(`hex:${campaign}:${id}:`) && k !== cacheKey(campaign, id, ver)) {
+            localStorage.removeItem(k);
+        }
+    }
+
+    localStorage.setItem(cacheKey(campaign, id, ver), JSON.stringify(data));
+    localStorage.setItem("hex:latest-version", ver);
+    return { data, isCached: false };
 }
 
 async function selectHex(id) {
@@ -235,20 +250,21 @@ async function selectHex(id) {
         const { data, isCached } = await getData(id);
 
         if (data.biome) {
-            biomeIndex.set(id, data.biome);
+            const biomeName = data.biome.name;
+            biomeIndex.set(id, biomeName);
             const cell = svg.querySelector(`g.hexcell[data-id="${id}"] polygon`);
             if (cell) {
-                cell.setAttribute("class", `hex ${data.biome} hex-border`);
+                cell.setAttribute("class", `hex ${biomeName} hex-border`);
             }
         }
         renderInfo(data, { cached: isCached });
     } catch (err) {
         const demo = {
             id,
-            biome: "demo",
-            summary: `A demo hex with gentle features. (demo)`,
-            threat: "demo",
-            loot: "demo",
+            biome: { name: "demo", altitude: 0, temperature: 0, humidity: 0 },
+            features: [{ name: "demo" }],
+            encounter: { name: "demo" },
+            discovered: false,
         };
         renderInfo(demo, { cached: false, demo: true, error: String(err) });
     }
@@ -271,12 +287,23 @@ function renderInfo(payload, { cached = false, demo = false, error = null } = {}
     info.innerHTML = "";
     const block = document.createElement("div");
     block.className = "card";
+    const biome = payload.biome;
+    const features = payload.features ?? [];
+    const encounter = payload.encounter;
+    const createdAt = payload.created_at ? String(payload.created_at) : "";
+    const biomeName = biome?.name ?? "unknown";
+    const encounterName = encounter?.name ?? "—";
+
     block.innerHTML = `
     <div class="row"><span class="k">Hex</span><span class="v">${escapeHtml(payload.id ?? payload.label ?? "—")}</span></div>
-    <div class="row"><span class="k">Biome</span><span class="v">${escapeHtml(payload.biome ?? "unknown")}</span></div>
-    <div class="row"><span class="k">Summary</span><span class="v">${escapeHtml(payload.summary ?? "—")}</span></div>
-    <div class="row"><span class="k">Threat</span><span class="v">${escapeHtml(payload.threat ?? "—")}</span></div>
-    <div class="row"><span class="k">Loot</span><span class="v">${escapeHtml(payload.loot ?? "—")}</span></div>
+    <div class="row"><span class="k">Biome</span><span class="v">${escapeHtml(biomeName)}</span></div>
+    <div class="row"><span class="k">Altitude</span><span class="v">${escapeHtml(biome.altitude)}</span></div>
+    <div class="row"><span class="k">Temperature</span><span class="v">${escapeHtml(biome.temperature)}</span></div>
+    <div class="row"><span class="k">Humidity</span><span class="v">${escapeHtml(biome.humidity)}</span></div>
+    <div class="row"><span class="k">Features</span><span class="v">${features.length ? features.map((f) => escapeHtml(f.name)).join(", ") : "—"}</span></div>
+    <div class="row"><span class="k">Encounter</span><span class="v">${escapeHtml(encounterName)}</span></div>
+    <div class="row"><span class="k">Discovered</span><span class="v">${payload.discovered ? "yes" : "no"}</span></div>
+    <div class="row"><span class="k">Created</span><span class="v">${escapeHtml(createdAt || "—")}</span></div>
     <div class="meta">${cached ? "from cache" : demo ? "demo data" : "live"}${error ? ` — <span class="err">${escapeHtml(error)}</span>` : ""}</div>
   `;
     info.appendChild(block);
@@ -293,8 +320,8 @@ function refreshCacheList() {
     }
     for (const key of items) {
         const li = document.createElement("li");
-        const { campaign, id } = parseCacheKey(key);
-        li.innerHTML = `<button data-k="${key}">${id}</button> <span class="muted">(${campaign})</span>`;
+        const { campaign, id, version } = parseCacheKey(key);
+        li.innerHTML = `<button data-k="${key}">${id}</button> <span class="muted">(${campaign} • v${version})</span>`;
         li.querySelector("button").addEventListener("click", () => {
             const payload = JSON.parse(localStorage.getItem(key));
             renderInfo(payload, { cached: true });
@@ -305,9 +332,9 @@ function refreshCacheList() {
 }
 
 function parseCacheKey(k) {
-    // hex:campaign:id
-    const [, campaign, id] = k.split(":");
-    return { campaign, id };
+    // hex:campaign:id:version
+    const [, campaign, id, version] = k.split(":");
+    return { campaign, id, version };
 }
 
 // ---- Utilities ----
